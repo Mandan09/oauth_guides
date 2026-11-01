@@ -21,7 +21,6 @@ class Settings(BaseSettings):
 
     runs_per_ip_per_hour: int = 5
     runs_per_day: int = 50
-    admin_token: str = ""
 
     @property
     def db_url(self) -> str:

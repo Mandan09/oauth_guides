@@ -11,8 +11,6 @@ services:
         sync: false
       - key: DATABASE_URL  # Neon connection string; postgresql://... is converted for asyncpg
         sync: false
-      - key: ADMIN_TOKEN
-        generateValue: true
       - key: OPENROUTER_API_KEY
         sync: false
       - key: GROQ_API_KEY

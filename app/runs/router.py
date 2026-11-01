@@ -3,7 +3,6 @@ import json
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
-from app.config import settings
 from app.runs import service
 from app.runs.schemas import AskRequest, RunRequest, RunStarted
 
@@ -23,9 +22,7 @@ async def ask(body: AskRequest, request: Request):
 
 
 @router.post("", response_model=RunStarted)
-async def start_run(body: RunRequest, request: Request, x_admin_token: str = Header("")):
-    if body.force and (not settings.admin_token or x_admin_token != settings.admin_token):
-        raise HTTPException(403, "Regenerating needs the admin token")
+async def start_run(body: RunRequest, request: Request):
     try:
         return await service.start(body.query, _ip(request), body.force, body.use_case)
     except service.RateLimited as e:

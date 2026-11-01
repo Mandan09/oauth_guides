@@ -28,6 +28,8 @@ Classify the developer's message and respond.
   reply: ask ONE short question for the name or URL and say what you will do once you have it.
 - kind "other": not about connecting an app via OAuth. Explain briefly what you can help with.
 
+fresh: true only if they explicitly ask for new, fresh, updated or re-done research (e.g. "research Slack again").
+
 use_case: whenever they say what their agent must do (for "app" or "need"), list those actions in one line.
 
 reply: 1-3 friendly sentences to the developer in the same language they wrote in. For "need", say you are
@@ -48,6 +50,7 @@ class Intake(BaseModel):
     kind: Literal["app", "need", "followup", "clarify", "other"]
     app: str = ""
     use_case: str = Field("", description="The agent's required actions, one line")
+    fresh: bool = False
     candidates: list[Candidate] = []
     reply: str
 

@@ -129,7 +129,7 @@ async def ask(message: str, ip: str, slug: str = "") -> dict:
     candidates = [{**c.model_dump(), "slug": await guides.match(c.name)} for c in intake.candidates]
     app = intake.app if intake.kind == "app" else candidates[0]["name"]
     try:
-        started = await start(app, ip, use_case=intake.use_case)
+        started = await start(app, ip, force=intake.fresh, use_case=intake.use_case)
     except RateLimited as e:
         started = {"error": str(e)}
     return {"kind": intake.kind, "reply": intake.reply, "app": app, "use_case": intake.use_case, "candidates": candidates, **started}
@@ -195,7 +195,7 @@ async def _execute(run_id: str, query: str, key: str, use_case: str) -> None:
               approval_wait=guide.approval_wait, seconds=round(time.monotonic() - t0), usage=usage)
     except asyncio.CancelledError:
         error = "stopped by user"
-        _emit(run_id, "error", message="Research stopped. Ask again any time.", finding=True)
+        _emit(run_id, "error", message="Research stopped. Ask again any time.", finding=True, stopped=True)
     except NotIdentified as e:  # a finding, not a failure: shown as a normal reply
         error = str(e)
         _emit(run_id, "error", message=error, finding=True)

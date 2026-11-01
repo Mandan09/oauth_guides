@@ -191,6 +191,11 @@ function render(item, opts) {
   if (item.type === "guide") {
     const msg = addMessage("assistant", `<p>${item.intro}</p>`, item.at);
     msg.insertBefore(artifactCard(item), $(".at", msg));
+    if (item.library) {
+      const again = el("button", "ghost-btn again", "↻ Research again");
+      again.addEventListener("click", () => guideFor(item.title, "", true));
+      msg.insertBefore(again, $(".at", msg));
+    }
     if (!opts.replay) openCanvas(item.slug);  // saved chats open as a conversation; the card opens the guide
   }
 }
@@ -222,16 +227,17 @@ function renderReply(item, { replay }) {
 }
 
 // ---------- asking ----------
-function showGuideItem(g, intro, owner = chat) {
+function showGuideItem(g, intro, owner = chat, library = false) {
   push({ type: "guide", slug: g.slug, title: g.app || g.title, difficulty: g.difficulty,
-         wait: g.approval_wait, website: g.website, intro }, owner);
+         wait: g.approval_wait, website: g.website, intro, library }, owner);
 }
 
 async function fromStart(started, name, owner) {
   if (started.error) return push({ type: "error", text: started.error }, owner);
   if (started.slug) {
     const g = await (await fetch(`/api/guides/${started.slug}`)).json();
-    return showGuideItem(g, `<b>${esc(g.app)}</b> is already in the library. Here's the guide.`, owner);
+    const when = g.generated_at ? ` (researched ${new Date(g.generated_at).toLocaleDateString()})` : "";
+    return showGuideItem(g, `<b>${esc(g.app)}</b> is already in the library${when}. Here's the guide; research it again if you want fresh findings.`, owner, true);
   }
   if (started.run_id) push({ type: "run", run_id: started.run_id, query: name }, owner);
 }
@@ -298,11 +304,11 @@ async function streamAnswer(message, owner, slug) {
   owner.items.push({ type: "answer", text, meta, at: new Date().toISOString() });  // the server already saved it
 }
 
-async function guideFor(name, useCase) {
+async function guideFor(name, useCase, force = false) {
   const owner = chat;
-  push({ type: "user", text: `Show me the guide for ${name}` }, owner);
+  push({ type: "user", text: force ? `Research ${name} again` : `Show me the guide for ${name}` }, owner);
   const res = await fetch("/api/runs", {
-    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query: name, use_case: useCase || "" }),
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query: name, use_case: useCase || "", force }),
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) return push({ type: "error", text: body.detail?.[0]?.msg || body.detail || "Something went wrong." }, owner);
@@ -437,7 +443,7 @@ function followRun(item, { replay }, owner) {
   source.addEventListener("error", (e) => {
     if (!e.data) return; // network blip: EventSource reconnects and resumes from the last id
     const d = JSON.parse(e.data);
-    finish(d.finding ? "Research finished" : "Research stopped");
+    finish(d.stopped || !d.finding ? "Research stopped" : "Research finished");
     document.title = "OAuth App Guides";
     if (!owner.items.some((i) => i.at > item.at && i.text === d.message))
       push(d.finding ? { type: "reply", text: d.message } : { type: "error", text: d.message }, owner);
@@ -472,6 +478,10 @@ if ($("#composer")) {
   });
   document.addEventListener("visibilitychange", () => !document.hidden && document.title.startsWith("✓") && (document.title = "OAuth App Guides"));
   $("#close-canvas").addEventListener("click", closeCanvas);
+  $("#research-again").addEventListener("click", () => {
+    const title = $(".guide", $("#canvas-body"))?.dataset.title;
+    if (title && openSlug) guideFor(title, "", true);
+  });
   $("#full-canvas").addEventListener("click", () => layout.classList.toggle("canvas-full"));
   document.addEventListener("keydown", (e) => e.key === "Escape" && layout.classList.remove("canvas-full"));
   $("#copy-link").addEventListener("click", async (e) => {
