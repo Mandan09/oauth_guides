@@ -1,0 +1,289 @@
+{
+  "app": "Linear",
+  "provider": "Linear Orbit, Inc.",
+  "website": "https://linear.app",
+  "category": "Issue Tracking",
+  "difficulty": "easy",
+  "headline": "Linear allows immediate public distribution of OAuth apps with no mandatory verification or review process.",
+  "summary": "Developers can build, test, and distribute Linear OAuth applications instantly by toggling a setting from private to public. While an official Integration Directory exists, submission is completely optional. For AI agents, Linear supports a dedicated application actor mode (actor=app) requiring workspace admin consent.",
+  "hands_on_time": "1 to 2 hours",
+  "approval_wait": "0 days",
+  "time_to_first_connection": "15 minutes",
+  "time_to_production": "Immediate upon toggling public distribution",
+  "oauth": {
+    "developer_portal": "https://linear.app/developers",
+    "docs_url": "https://linear.app/developers/oauth-2-0-authentication",
+    "authorize_url": "https://linear.app/oauth/authorize",
+    "token_url": "https://api.linear.app/oauth/token",
+    "pkce": "Natively supported and recommended for response_type=code using S256 or plain methods, making the client_secret optional for token exchange and refresh.",
+    "refresh_tokens": "Access tokens expire after 24 hours. Refreshing tokens performs rotation, issuing new access and refresh tokens. A 30-minute grace period allows replaying failed refresh requests during network drops.",
+    "redirect_uri_rules": "Redirect URIs must match exactly in both the authorization request and the application settings. http://localhost is permitted for local development.",
+    "scopes": "Automatically includes 'read'. 'write' provides full access, with granular options available. Specialized bot scopes 'app:mentionable' and 'app:assignable' are available when using actor=app."
+  },
+  "stages": [
+    {
+      "name": "Workspace and App Setup",
+      "duration": "15 minutes",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Create Management Workspace",
+          "detail": "Create a dedicated Linear workspace solely for managing the OAuth application so all admins share credential access.",
+          "owner": "you",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s2"
+          ]
+        },
+        {
+          "title": "Register Application",
+          "detail": "Navigate to Settings > Administration > API to register the OAuth client and specify exact redirect URIs.",
+          "owner": "you",
+          "duration": "10 minutes",
+          "source_ids": [
+            "s2"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Integration Development",
+      "duration": "1 to 2 weeks",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Implement OAuth PKCE Flow",
+          "detail": "Build the authorization flow using the authorize endpoint and PKCE code challenges.",
+          "owner": "agent",
+          "duration": "1 day",
+          "source_ids": [
+            "s2"
+          ]
+        },
+        {
+          "title": "Build Agent API Logic",
+          "detail": "Develop GraphQL queries and mutations respecting rate limits and query complexity scores.",
+          "owner": "agent",
+          "duration": "1 week",
+          "source_ids": [
+            "s6"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Production Release",
+      "duration": "5 minutes",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Toggle Public Distribution",
+          "detail": "Switch the application distribution setting from private to public in the application manifest or settings.",
+          "owner": "you",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s1"
+          ]
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "text": "The OAuth app name (client_name) must be between 2 and 80 characters, cannot contain the word 'Linear', and cannot use protocol prefixes like http:// or https://.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Installing an app with actor=app (application mode) mandates Linear workspace admin approval.",
+      "status": "sourced",
+      "source_ids": [
+        "s4"
+      ]
+    },
+    {
+      "text": "Linear requires exact string matching for redirect URIs between the app configuration and authorization requests.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    }
+  ],
+  "gotchas": [
+    {
+      "text": "Linear does not publish standard OAuth/OIDC discovery metadata at its root domain.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "Using actor=app with the 'admin' scope is strictly restricted and will be automatically rejected.",
+      "status": "sourced",
+      "source_ids": [
+        "s2",
+        "s4"
+      ]
+    },
+    {
+      "text": "Linear provides a 30-minute grace period on refresh tokens, allowing developers to safely replay refresh requests if a network dropout occurs during token rotation.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Individual GraphQL queries exceeding 10,000 complexity points will be immediately rejected regardless of hourly quotas.",
+      "status": "sourced",
+      "source_ids": [
+        "s6"
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "action": "Read connected user's issues and workspace data",
+      "scopes": [
+        "read"
+      ],
+      "review_impact": "Default scope. No extra review required. Delegated user mode requires only individual user consent.",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "action": "Create and update issues, comments, and projects",
+      "scopes": [
+        "write",
+        "issues:create",
+        "comments:create"
+      ],
+      "review_impact": "No extra review required. Delegated user mode requires only individual user consent.",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "action": "Act autonomously as an AI agent rather than a specific user",
+      "scopes": [
+        "app:mentionable",
+        "app:assignable"
+      ],
+      "review_impact": "Requires passing actor=app during authorization. Triggers mandatory workspace admin consent upon installation. Agents do not consume paid billable seats.",
+      "source_ids": [
+        "s4"
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "issue": "Enterprise workspace owners restrict third-party OAuth app installations.",
+      "how_to_proceed": "The requesting user must petition their internal workspace administrators to approve the application or lift the restriction."
+    },
+    {
+      "issue": "Integration Directory submission rejected for being a hobby project or 'vibe-coded' script.",
+      "how_to_proceed": "Skip the directory. Directory listing is optional and strictly for marketing. You can still distribute the app publicly to any external user via standard OAuth authorization URLs."
+    }
+  ],
+  "agent_can": [
+    "Implement PKCE code challenge generation and token exchange logic.",
+    "Draft robust retry logic to handle the 30-minute refresh token grace period.",
+    "Monitor and parse X-RateLimit-Requests and X-RateLimit-Complexity headers to throttle API calls."
+  ],
+  "you_must": [
+    "Set up a dedicated Linear workspace for app ownership to prevent credential lock-in to a single user account.",
+    "Ensure the application name complies with trademark rules by omitting the word 'Linear'.",
+    "Manually toggle the app distribution setting to 'public' to allow external installs."
+  ],
+  "key_claims": [
+    {
+      "text": "The authorize endpoint is live and responding at https://linear.app/oauth/authorize.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "The Linear developer portal is publicly accessible at https://linear.app/developers.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "No mandatory third-party security assessment or domain verification is required to make an OAuth app public.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Rate limits are set to 5,000 requests and 2,000,000 complexity points per hour per user/app combination.",
+      "status": "sourced",
+      "source_ids": [
+        "s6"
+      ]
+    }
+  ],
+  "open_questions": [
+    "Does Linear plan to enforce API usage limits or directory requirements on public unlisted apps in the future?",
+    "What is the exact internal review turnaround time for apps that do opt into the Integration Directory?"
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "OAuth App Manifests",
+      "url": "https://linear.app/developers/oauth-app-manifests"
+    },
+    {
+      "id": "s2",
+      "title": "OAuth 2.0 Authentication",
+      "url": "https://linear.app/developers/oauth-2-0-authentication"
+    },
+    {
+      "id": "s3",
+      "title": "Integration Directory",
+      "url": "https://linear.app/developers/integration-directory"
+    },
+    {
+      "id": "s4",
+      "title": "Building AI Agents for Linear",
+      "url": "https://linear.app/developers/agents"
+    },
+    {
+      "id": "s5",
+      "title": "Security and Access",
+      "url": "https://linear.app/docs/security-and-access"
+    },
+    {
+      "id": "s6",
+      "title": "Rate Limiting",
+      "url": "https://linear.app/developers/rate-limiting"
+    }
+  ],
+  "slug": "linear",
+  "probes": [
+    {
+      "check": "authorize",
+      "request": "GET https://linear.app/oauth/authorize (fake client_id)",
+      "result": "HTTP 200, landed on linear.app; error hints: ['client_id', 'application', 'redirect_uri']"
+    },
+    {
+      "check": "discovery",
+      "request": "GET https://linear.app/.well-known/openid-configuration",
+      "result": "HTTP 404, no metadata"
+    },
+    {
+      "check": "discovery",
+      "request": "GET https://linear.app/.well-known/oauth-authorization-server",
+      "result": "HTTP 404, no metadata"
+    }
+  ],
+  "warnings": [],
+  "origin": "seed",
+  "models": [
+    "gemini-3.1-pro-preview",
+    "gemini-3.8-flash"
+  ],
+  "search_providers": [
+    "gemini"
+  ],
+  "generated_at": "2026-11-01T14:00:18+00:00",
+  "verified_note": ""
+}

@@ -1,0 +1,327 @@
+{
+  "app": "Zoho CRM",
+  "provider": "Zoho Corporation",
+  "website": "https://www.zoho.com/crm/",
+  "category": "CRM",
+  "difficulty": "easy",
+  "headline": "Direct OAuth integration for external Zoho CRM users is free, instant, and requires no mandatory app review.",
+  "summary": "Developers can create a Server-based Application in the Zoho API Console to instantly authorize external users. Multi-tenant access works by default, but developers must explicitly toggle Multi DC Support to accept users across Zoho's international data centers. A formal app review is strictly optional and only required if listing in the Zoho Marketplace.",
+  "hands_on_time": "1 to 2 hours",
+  "approval_wait": "None",
+  "time_to_first_connection": "Immediate",
+  "time_to_production": "Immediate",
+  "oauth": {
+    "developer_portal": "https://api-console.zoho.com",
+    "docs_url": "https://www.zoho.com/crm/developer/docs/api/v8/oauth-overview.html",
+    "authorize_url": "https://{accounts_url}/oauth/v2/auth",
+    "token_url": "https://{accounts_url}/oauth/v2/token",
+    "pkce": "Supported (code_challenge_method=S256), mandatory for mobile/SPA clients.",
+    "refresh_tokens": "Include access_type=offline and prompt=consent in the authorization request. Tokens never expire but are limited to 20 per user per app.",
+    "redirect_uri_rules": "Strict exact match required. Must use HTTPS (except HTTP for local development). Multiple URIs are supported.",
+    "scopes": "Comma-separated following service_name.scope_name.OPERATION_TYPE (e.g., ZohoCRM.modules.ALL,ZohoCRM.users.READ)."
+  },
+  "stages": [
+    {
+      "name": "App Registration",
+      "duration": "15 minutes",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Create Server-based Application",
+          "detail": "Log into the Zoho API Console and create a Server-based Application to support external Multi-tenant users.",
+          "owner": "you",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s1",
+            "s3",
+            "s7"
+          ]
+        },
+        {
+          "title": "Enable Multi DC Support",
+          "detail": "Explicitly toggle Multi DC Support in the client settings to accept international users and generate region-specific Client Secrets.",
+          "owner": "you",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s4"
+          ]
+        },
+        {
+          "title": "Document Required Scopes",
+          "detail": "Identify the exact Zoho CRM scopes required for the AI agent (e.g., ZohoCRM.modules.ALL).",
+          "owner": "agent",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s6",
+            "s13"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OAuth Implementation",
+      "duration": "1 to 2 days",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Implement Multi-DC OAuth Flow",
+          "detail": "Write logic to dynamically target the correct accounts domain (e.g., accounts.zoho.com vs accounts.zoho.eu) based on the user's location and supply the matching regional Client Secret.",
+          "owner": "agent",
+          "duration": "1 day",
+          "source_ids": [
+            "s4",
+            "s10"
+          ]
+        },
+        {
+          "title": "Implement Fast Token Exchange",
+          "detail": "Ensure the application exchanges the authorization grant code for an access token within the strict 2-minute expiration window.",
+          "owner": "agent",
+          "duration": "2 hours",
+          "source_ids": [
+            "s9"
+          ]
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "text": "Multi DC Support must be manually toggled in the API Console to accept users from non-home data centers (EU, IN, AU, JP, CA, CN).",
+      "status": "sourced",
+      "source_ids": [
+        "s4"
+      ]
+    },
+    {
+      "text": "The target Zoho CRM organization must be on a paid edition or an active developer/sandbox plan to access the API.",
+      "status": "sourced",
+      "source_ids": [
+        "s14"
+      ]
+    },
+    {
+      "text": "Direct integrations for external users do not require mandatory app review or security audits.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    }
+  ],
+  "gotchas": [
+    {
+      "text": "Authorization grant codes expire in exactly 2 minutes.",
+      "status": "sourced",
+      "source_ids": [
+        "s9"
+      ]
+    },
+    {
+      "text": "Zoho enforces a hard limit of 20 active refresh tokens per user per app. Creating a 21st token automatically revokes the oldest one without warning.",
+      "status": "sourced",
+      "source_ids": [
+        "s11"
+      ]
+    },
+    {
+      "text": "Attempting to use a client secret or authorization code from a different data center region will result in invalid_client or invalid_code errors.",
+      "status": "sourced",
+      "source_ids": [
+        "s4"
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "action": "Read and write standard and custom CRM records (Leads, Contacts, Deals).",
+      "scopes": [
+        "ZohoCRM.modules.ALL"
+      ],
+      "review_impact": "Requires user to have assigned profile permissions and the organization to be on a paid plan. No extra review required.",
+      "source_ids": [
+        "s13",
+        "s14"
+      ]
+    },
+    {
+      "action": "Read CRM configuration, custom fields, and layout metadata.",
+      "scopes": [
+        "ZohoCRM.settings.READ"
+      ],
+      "review_impact": "No extra review required.",
+      "source_ids": [
+        "s13"
+      ]
+    },
+    {
+      "action": "Read organization user identity and profiles.",
+      "scopes": [
+        "ZohoCRM.users.READ"
+      ],
+      "review_impact": "No extra review required.",
+      "source_ids": [
+        "s13"
+      ]
+    },
+    {
+      "action": "Modify organizational settings or restricted administrative configurations.",
+      "scopes": [
+        "ZohoCRM.org.ALL",
+        "ZohoCRM.settings.roles"
+      ],
+      "review_impact": "Requires the authenticating user to hold an Administrator role to grant consent.",
+      "source_ids": [
+        "s13"
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "issue": "Encountering invalid_client or invalid_code during token exchange.",
+      "how_to_proceed": "Verify the authenticating user's Data Center (provided in the location callback parameter) and ensure the application targets the matching regional Accounts URL and region-specific Client Secret."
+    },
+    {
+      "issue": "Refresh tokens inexplicably stop working for users who log in frequently.",
+      "how_to_proceed": "You have likely hit the 20 refresh token limit per user. Store refresh tokens securely per user ID and reuse them rather than requesting a new refresh token on every login."
+    }
+  ],
+  "agent_can": [
+    "Determine required OAuth scopes based on the planned API operations.",
+    "Implement logic to parse the 'location' callback parameter and route token requests to the correct regional data center endpoint.",
+    "Implement token lifecycle management to stay under the 20 active refresh tokens limit.",
+    "Ensure authorization codes are exchanged within the strict 2-minute validity window."
+  ],
+  "you_must": [
+    "Register a Server-based Application in the Zoho API Console.",
+    "Explicitly toggle 'Multi DC Support' in the application settings.",
+    "Add authorized redirect URIs to the application profile."
+  ],
+  "key_claims": [
+    {
+      "text": "Direct OAuth integration for SaaS platforms is free, immediate, and skips mandatory review.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "The authorization endpoint accounts.zoho.com/oauth/v2/auth is live and actively redirects to the Zoho sign-in service.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "The developer API console requires authentication and is hosted at api-console.zoho.com.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "Zoho supports PKCE with the S256 method.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "Multi DC Support requires explicit manual toggling by the developer in the console.",
+      "status": "sourced",
+      "source_ids": [
+        "s4"
+      ]
+    }
+  ],
+  "open_questions": [],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Zoho Developer Web Server Apps Overview",
+      "url": "https://www.zoho.com/developer/oauth/web-server-apps/overview.html"
+    },
+    {
+      "id": "s2",
+      "title": "Get Authorization Code",
+      "url": "https://www.zoho.com/developer/oauth/web-server-apps/get-authorization-code.html"
+    },
+    {
+      "id": "s3",
+      "title": "Client Types in Zoho Developer Console",
+      "url": "https://help.zoho.com/portal/en/community/topic/kaizen-116-client-types-in-zoho-developer-console"
+    },
+    {
+      "id": "s4",
+      "title": "Zoho CRM Multi-DC Support",
+      "url": "https://www.zoho.com/crm/developer/docs/api/v8/multi-dc.html"
+    },
+    {
+      "id": "s5",
+      "title": "Zoho Marketplace Review Process Guidelines",
+      "url": "https://www.zoho.com/marketplace/help-guide/review-process-guidelines.html"
+    },
+    {
+      "id": "s6",
+      "title": "Zoho CRM OAuth Overview",
+      "url": "https://www.zoho.com/crm/developer/docs/api/v8/oauth-overview.html"
+    },
+    {
+      "id": "s7",
+      "title": "Register Zoho CRM Client",
+      "url": "https://www.zoho.com/crm/developer/docs/api/v8/register-client.html"
+    },
+    {
+      "id": "s8",
+      "title": "Listing in Zoho Marketplace",
+      "url": "https://www.zoho.com/marketplace/help-guide/listing-marketplace.html"
+    },
+    {
+      "id": "s9",
+      "title": "Generate Access and Refresh Tokens",
+      "url": "https://www.zoho.com/crm/developer/docs/api/v8/access-refresh.html"
+    },
+    {
+      "id": "s10",
+      "title": "Authorization Request",
+      "url": "https://www.zoho.com/crm/developer/docs/api/v8/auth-request.html"
+    },
+    {
+      "id": "s11",
+      "title": "OAuth Token Limits",
+      "url": "https://www.zoho.com/developer/oauth/token-limits.html"
+    },
+    {
+      "id": "s12",
+      "title": "Refresh Access Token",
+      "url": "https://www.zoho.com/crm/developer/docs/api/v8/refresh.html"
+    },
+    {
+      "id": "s13",
+      "title": "Zoho CRM API Scopes",
+      "url": "https://www.zoho.com/crm/developer/docs/api/v8/scopes.html"
+    },
+    {
+      "id": "s14",
+      "title": "Zoho CRM API Limits",
+      "url": "https://www.zoho.com/crm/developer/docs/api/v8/api-limits.html"
+    }
+  ],
+  "slug": "zoho-crm",
+  "probes": [
+    {
+      "check": "discovery",
+      "request": "GET https://accounts.zoho.com/.well-known/openid-configuration",
+      "result": "HTTP 200; PKCE ['plain', 'S256']; dynamic registration not listed"
+    },
+    {
+      "check": "authorize",
+      "request": "GET https://accounts.zoho.com/oauth/v2/auth (fake client_id)",
+      "result": "HTTP 200, landed on accounts.zoho.com; error hints: ['client_id', 'redirect_uri']"
+    }
+  ],
+  "warnings": [],
+  "origin": "seed",
+  "models": [
+    "gemini-3.1-pro-preview",
+    "gemini-3.8-flash"
+  ],
+  "search_providers": [
+    "gemini"
+  ],
+  "generated_at": "2026-11-01T14:27:40+00:00",
+  "verified_note": ""
+}

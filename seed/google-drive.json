@@ -1,0 +1,426 @@
+{
+  "app": "Google Drive",
+  "provider": "Google",
+  "website": "https://www.google.com/drive/",
+  "category": "Cloud Storage",
+  "difficulty": "hard",
+  "headline": "Connecting Google Drive is easy for internal testing, but public apps requiring broad read access face a mandatory security audit costing thousands of dollars.",
+  "summary": "Developers can immediately test integrations using the 'Testing' mode with up to 100 allowlisted users, though tokens expire every 7 days. Reaching production is straightforward if you limit access to non-sensitive scopes like drive.file. However, requesting restricted scopes (like reading all files) requires a mandatory Cloud App Security Assessment (CASA) by a third-party lab, costing $3,000-$10,000+ and taking up to 6 weeks.",
+  "hands_on_time": "2 to 5 days",
+  "approval_wait": "3 days to 6 weeks",
+  "time_to_first_connection": "15 to 30 minutes",
+  "time_to_production": "1 to 8 weeks",
+  "oauth": {
+    "developer_portal": "https://console.cloud.google.com/",
+    "docs_url": "https://developers.google.com/drive/api/guides/api-specific-auth",
+    "authorize_url": "https://accounts.google.com/o/oauth2/v2/auth",
+    "token_url": "https://oauth2.googleapis.com/token",
+    "pkce": "Supported. Clients must pass code_challenge and code_challenge_method=S256 during authorization, and matching code_verifier during token exchange.",
+    "refresh_tokens": "Requires access_type=offline and prompt=consent in the auth request. Expires after 7 days in 'Testing' mode or 6 months of inactivity. Limit of 100 tokens per user per client ID.",
+    "redirect_uri_rules": "Strict character-for-character matching required (no wildcards or fragments). Must use https://, except http:// is allowed for localhost/127.0.0.1. Raw IPs are forbidden.",
+    "scopes": "Configured via APIs & Services > OAuth consent screen. Narrow scopes (drive.file) avoid intense review; broad scopes trigger mandatory third-party audits."
+  },
+  "stages": [
+    {
+      "name": "Initial App Creation and Testing Mode",
+      "duration": "15 to 30 minutes",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Register App and Obtain Credentials",
+          "detail": "Create a project in Google Cloud Console, enable the Google Drive API, configure the consent screen to 'External' (Testing status), and generate a Web Application OAuth client ID.",
+          "owner": "you",
+          "duration": "15 mins",
+          "source_ids": [
+            "s1",
+            "s2",
+            "s11"
+          ]
+        },
+        {
+          "title": "Implement PKCE Auth Flow",
+          "detail": "Write the server-side or local agent code to authorize users with code_challenge (S256) and obtain offline refresh tokens.",
+          "owner": "agent",
+          "duration": "15 mins",
+          "source_ids": [
+            "s11",
+            "s12"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Asset and Documentation Preparation",
+      "duration": "1 to 3 days",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Verify Domain Ownership",
+          "detail": "Verify the domain hosting your privacy policy, homepage, and redirect URIs in Google Search Console via the DNS Domain Property method.",
+          "owner": "you",
+          "duration": "1 to 2 days",
+          "source_ids": [
+            "s6"
+          ]
+        },
+        {
+          "title": "Draft and Publish Privacy Policy",
+          "detail": "Publish an HTML privacy policy that explicitly addresses compliance with the Google API Services User Data Policy and Limited Use requirements.",
+          "owner": "agent",
+          "duration": "2 hours",
+          "source_ids": [
+            "s6",
+            "s10"
+          ]
+        },
+        {
+          "title": "Record YouTube Demo Video",
+          "detail": "Record an unlisted YouTube video showing the full OAuth flow starting from a clean browser, visibly displaying the client ID in the URL bar, and demonstrating app functionality.",
+          "owner": "you",
+          "duration": "4 hours",
+          "source_ids": [
+            "s6"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Google Brand and Scope Verification",
+      "duration": "2 to 10 business days",
+      "blocking": true,
+      "steps": [
+        {
+          "title": "Submit Verification Request",
+          "detail": "Submit the OAuth consent screen for production review, providing the demo video, scope justifications, and verified domain links.",
+          "owner": "you",
+          "duration": "30 mins",
+          "source_ids": [
+            "s6",
+            "s7"
+          ]
+        },
+        {
+          "title": "Wait for Google Review",
+          "detail": "Google reviews the brand assets and non-sensitive/sensitive scope requests.",
+          "owner": "provider",
+          "duration": "2 to 10 days",
+          "source_ids": [
+            "s9"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CASA Security Assessment (Restricted Scopes Only)",
+      "duration": "4 to 6 weeks",
+      "blocking": true,
+      "steps": [
+        {
+          "title": "Engage Third-Party Authorized Lab",
+          "detail": "If requesting restricted scopes (e.g., drive.readonly), pay an authorized lab $3,000-$10,000+ to conduct a Tier 2 Cloud App Security Assessment (CASA).",
+          "owner": "you",
+          "duration": "1 to 3 days",
+          "source_ids": [
+            "s3",
+            "s8"
+          ]
+        },
+        {
+          "title": "Complete Audit and Receive LOV",
+          "detail": "Work with the lab to remediate any security findings and receive a Letter of Validation (LOV) valid for 1 year.",
+          "owner": "provider",
+          "duration": "4 to 6 weeks",
+          "source_ids": [
+            "s4",
+            "s9"
+          ]
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "text": "Your redirect URIs, privacy policy, and homepage must reside on a domain verified by a project owner in Google Search Console.",
+      "status": "sourced",
+      "source_ids": [
+        "s6"
+      ]
+    },
+    {
+      "text": "A publicly accessible HTML privacy policy is required, containing explicit Limited Use compliance language.",
+      "status": "sourced",
+      "source_ids": [
+        "s6",
+        "s10"
+      ]
+    },
+    {
+      "text": "A YouTube demo video must be provided, visibly displaying the client ID in the browser URL bar during the OAuth flow.",
+      "status": "sourced",
+      "source_ids": [
+        "s6"
+      ]
+    },
+    {
+      "text": "Apps requesting restricted scopes must undergo an annual third-party CASA security assessment to obtain a Letter of Validation.",
+      "status": "sourced",
+      "source_ids": [
+        "s3",
+        "s4"
+      ]
+    },
+    {
+      "text": "A written justification is required for every requested scope, explaining why narrower scopes cannot be used.",
+      "status": "sourced",
+      "source_ids": [
+        "s7"
+      ]
+    }
+  ],
+  "gotchas": [
+    {
+      "text": "Refresh tokens issued to external test users in the 'Testing' publishing status expire automatically after 7 days.",
+      "status": "sourced",
+      "source_ids": [
+        "s1",
+        "s13"
+      ]
+    },
+    {
+      "text": "Google limits refresh tokens to 100 per user per client ID; generating a 101st token revokes the oldest one without warning.",
+      "status": "sourced",
+      "source_ids": [
+        "s13"
+      ]
+    },
+    {
+      "text": "Requesting broad restricted scopes (like the full drive scope) when a narrower scope (like drive.file) suffices will result in verification rejection.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Internal Workspace apps bypass external verification and security assessments entirely.",
+      "status": "sourced",
+      "source_ids": [
+        "s1",
+        "s2"
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "action": "Create new files or access files explicitly opened by the user (via Google Picker)",
+      "scopes": [
+        "https://www.googleapis.com/auth/drive.file"
+      ],
+      "review_impact": "Requires only standard brand/non-sensitive verification; no third-party audit required.",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "action": "Store and manage the agent's private application data in a dedicated hidden folder",
+      "scopes": [
+        "https://www.googleapis.com/auth/drive.appdata"
+      ],
+      "review_impact": "Requires only standard brand/non-sensitive verification; no third-party audit required.",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "action": "Search, inspect metadata, and download all files across the user's entire Drive",
+      "scopes": [
+        "https://www.googleapis.com/auth/drive.readonly"
+      ],
+      "review_impact": "Triggers restricted scope verification and a mandatory paid CASA Tier 2 security assessment.",
+      "source_ids": [
+        "s2",
+        "s3"
+      ]
+    },
+    {
+      "action": "Full read, write, create, and delete access across all user files and folders",
+      "scopes": [
+        "https://www.googleapis.com/auth/drive"
+      ],
+      "review_impact": "Triggers restricted scope verification and a mandatory paid CASA Tier 2 security assessment.",
+      "source_ids": [
+        "s2",
+        "s3"
+      ]
+    },
+    {
+      "action": "List, search, and view file metadata (names, hierarchy) without reading contents",
+      "scopes": [
+        "https://www.googleapis.com/auth/drive.metadata.readonly"
+      ],
+      "review_impact": "Triggers restricted scope verification and a mandatory paid CASA Tier 2 security assessment.",
+      "source_ids": [
+        "s2",
+        "s3"
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "issue": "You need to test the integration with external users but haven't passed verification or CASA.",
+      "how_to_proceed": "Set your OAuth consent screen publishing status to 'Testing' and add up to 100 test user emails to the allowlist. Inform testers they will need to re-authenticate every 7 days due to token expiry."
+    },
+    {
+      "issue": "Google rejected verification citing 'Scope Overreach'.",
+      "how_to_proceed": "Downgrade your requested scopes (e.g., from drive to drive.file), update your application to use the Google Picker API for explicit file selection, and resubmit your written justification."
+    },
+    {
+      "issue": "Verification is stuck because the demo video was rejected.",
+      "how_to_proceed": "Record a new unlisted YouTube video. Ensure you start from a clean browser, visibly highlight the client ID in the URL bar during the consent screen, and show exactly how the requested scopes are used in your app."
+    }
+  ],
+  "agent_can": [
+    "Draft the privacy policy incorporating the required Limited Use compliance clauses.",
+    "Write the least-privilege scope justifications for the Google verification review.",
+    "Implement the OAuth PKCE flow (code challenge/verifier) and token exchange logic.",
+    "Handle Drive API 429 rate limit errors using truncated exponential backoff."
+  ],
+  "you_must": [
+    "Create the project and configure the OAuth consent screen in the Google Cloud Console.",
+    "Verify domain ownership in Google Search Console using the DNS method.",
+    "Record and upload the YouTube demo video showing the OAuth flow and client ID.",
+    "Pay a third-party laboratory and undergo a CASA security assessment if using restricted scopes."
+  ],
+  "key_claims": [
+    {
+      "text": "Refresh tokens issued in 'Testing' status expire after 7 days.",
+      "status": "sourced",
+      "source_ids": [
+        "s1",
+        "s13"
+      ]
+    },
+    {
+      "text": "Restricted scopes require an annual CASA Tier 2 security assessment costing thousands of dollars.",
+      "status": "sourced",
+      "source_ids": [
+        "s3",
+        "s4",
+        "s8"
+      ]
+    },
+    {
+      "text": "The authorization endpoint natively supports PKCE with S256.",
+      "status": "tested",
+      "source_ids": [
+        "s12"
+      ]
+    },
+    {
+      "text": "Drive API quota limit is 325,000 quota units per minute per user.",
+      "status": "sourced",
+      "source_ids": [
+        "s14"
+      ]
+    },
+    {
+      "text": "Google OAuth authorization endpoint is active and enforces strict parameter validation.",
+      "status": "tested",
+      "source_ids": []
+    }
+  ],
+  "open_questions": [
+    "Which authorized CASA labs offer the fastest turnaround times or discounts for early-stage startups?",
+    "Can an app completely bypass the CASA requirement by restricting usage entirely to a Google Workspace Marketplace domain-wide install?"
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Setting up your OAuth consent screen",
+      "url": "https://support.google.com/cloud/answer/15549945?hl=en"
+    },
+    {
+      "id": "s2",
+      "title": "Google Drive API: Choose Auth Scopes",
+      "url": "https://developers.google.com/workspace/drive/api/guides/api-specific-auth"
+    },
+    {
+      "id": "s3",
+      "title": "Restricted Scope OAuth App Verification",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification"
+    },
+    {
+      "id": "s4",
+      "title": "CASA Tier 2 Complete and Submit",
+      "url": "https://appdefensealliance.dev/casa/tier-2/complete-submit"
+    },
+    {
+      "id": "s6",
+      "title": "OAuth App Verification FAQ (Prerequisites)",
+      "url": "https://support.google.com/cloud/answer/13806988?hl=en"
+    },
+    {
+      "id": "s7",
+      "title": "Provide Scope Justification",
+      "url": "https://support.google.com/cloud/answer/13807380?hl=en"
+    },
+    {
+      "id": "s8",
+      "title": "OAuth Verification Costs and Fees",
+      "url": "https://support.google.com/cloud/answer/13465431?hl=en"
+    },
+    {
+      "id": "s9",
+      "title": "OAuth Verification Timelines",
+      "url": "https://support.google.com/cloud/answer/13463817?hl=en"
+    },
+    {
+      "id": "s10",
+      "title": "Google API Services User Data Policy",
+      "url": "https://developers.google.com/identity/protocols/oauth2/policies"
+    },
+    {
+      "id": "s11",
+      "title": "Using OAuth 2.0 for Web Server Applications",
+      "url": "https://developers.google.com/identity/protocols/oauth2/web-server"
+    },
+    {
+      "id": "s12",
+      "title": "OAuth 2.0 for Mobile & Desktop Apps",
+      "url": "https://developers.google.com/identity/protocols/oauth2/native-app"
+    },
+    {
+      "id": "s13",
+      "title": "Using OAuth 2.0 to Access Google APIs",
+      "url": "https://developers.google.com/identity/protocols/oauth2"
+    },
+    {
+      "id": "s14",
+      "title": "Drive API Usage Limits",
+      "url": "https://developers.google.com/workspace/drive/api/guides/limits"
+    }
+  ],
+  "slug": "google-drive",
+  "probes": [
+    {
+      "check": "discovery",
+      "request": "GET https://accounts.google.com/.well-known/openid-configuration",
+      "result": "HTTP 200; PKCE ['plain', 'S256']; dynamic registration not listed"
+    },
+    {
+      "check": "authorize",
+      "request": "GET https://accounts.google.com/o/oauth2/v2/auth (fake client_id)",
+      "result": "HTTP 200, landed on accounts.google.com; error hints: ['client_id']"
+    }
+  ],
+  "warnings": [],
+  "origin": "seed",
+  "models": [
+    "gemini-3.1-pro-preview",
+    "gemini-3.8-flash"
+  ],
+  "search_providers": [
+    "gemini"
+  ],
+  "generated_at": "2026-11-01T14:26:47+00:00",
+  "verified_note": ""
+}

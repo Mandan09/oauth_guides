@@ -1,0 +1,334 @@
+{
+  "app": "Asana",
+  "provider": "Asana, Inc.",
+  "website": "https://asana.com",
+  "category": "Project Management",
+  "difficulty": "easy",
+  "headline": "Build and test your Asana integration instantly with optional App Directory review taking around one week.",
+  "summary": "Asana offers a developer-friendly OAuth 2.0 API with instant access to testing and own-workspace distribution without review. Standalone external integrations are self-serve, while listing in the public App Directory or using native App Components requires a formal security and QA review.",
+  "hands_on_time": "1-3 hours",
+  "approval_wait": "None for private/unlisted use; ~1 week for App Directory",
+  "time_to_first_connection": "Under 5 minutes",
+  "time_to_production": "Instant for own workspace; 1 week for public directory",
+  "oauth": {
+    "developer_portal": "https://developers.asana.com",
+    "docs_url": "https://developers.asana.com/docs/oauth",
+    "authorize_url": "https://app.asana.com/-/oauth_authorize",
+    "token_url": "https://app.asana.com/-/oauth_token",
+    "pkce": "Supported using code_challenge and code_challenge_method=S256 (or plain)",
+    "refresh_tokens": "Supported; returned with the initial token exchange, long-lived with no fixed expiration window, valid until explicitly revoked.",
+    "redirect_uri_rules": "Must strictly match registered URLs. Non-native web apps require secure https://. Native/CLI apps can use urn:ietf:wg:oauth:2.0:oob.",
+    "scopes": "Required scopes must be explicitly enabled in the Developer Console under OAuth > Permission scopes before authorization."
+  },
+  "stages": [
+    {
+      "name": "App Registration and Initial Testing",
+      "duration": "15 minutes",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Register the application",
+          "detail": "Create a new app in the Developer Console under 'My apps', configure the app name, and generate the client_id and client_secret.",
+          "owner": "you",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s3"
+          ]
+        },
+        {
+          "title": "Configure OAuth scopes and redirect URIs",
+          "detail": "Set up HTTPS redirect URIs and enable standard scopes (projects:read, tasks:read, tasks:write, users:read) in the Developer Console.",
+          "owner": "agent",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s3",
+            "s4"
+          ]
+        },
+        {
+          "title": "Test OAuth flow",
+          "detail": "Execute the authorization code flow with PKCE and the state parameter using a workspace you are a member of.",
+          "owner": "agent",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s1",
+            "s2",
+            "s3"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Distribution Configuration",
+      "duration": "1 hour",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Set workspace distribution",
+          "detail": "Select 'Specific workspaces' to distribute to your own org, or select 'Any workspace' for multi-tenant unlisted distribution.",
+          "owner": "you",
+          "duration": "15 minutes",
+          "source_ids": [
+            "s2"
+          ]
+        },
+        {
+          "title": "Draft app directory profile",
+          "detail": "Prepare an app listing profile with a unique icon, screenshots, a short summary, and a long description of at least 250 characters.",
+          "owner": "agent",
+          "duration": "45 minutes",
+          "source_ids": [
+            "s1"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "App Directory Review (Optional)",
+      "duration": "1 week",
+      "blocking": true,
+      "steps": [
+        {
+          "title": "Provide legal and demo assets",
+          "detail": "Supply verified company info, privacy policy URL, support URL, step-by-step instructions, and a screencast video.",
+          "owner": "you",
+          "duration": "1 hour",
+          "source_ids": [
+            "s1",
+            "s2"
+          ]
+        },
+        {
+          "title": "Wait for QA and Security Review",
+          "detail": "Asana reviews the submission to ensure no trademark infringements, correct CSRF state validation, and working flow.",
+          "owner": "provider",
+          "duration": "1 week",
+          "source_ids": [
+            "s1"
+          ]
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "text": "App listing requires a long description of at least 250 characters without formatting or grammatical errors.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Submission must include a direct URL to a publicly accessible Privacy Policy.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "OAuth implementation must use a secure HTTPS redirect URL and implement CSRF prevention via an unguessable state parameter.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Review submission demands a screencast video demonstrating the app and step-by-step setup instructions.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    }
+  ],
+  "gotchas": [
+    {
+      "text": "Using native Asana terms (tasks, projects, workflows, automations) in UI labels or dropdowns can cause app rejection.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "There are conflicting statements in the documentation regarding whether multi-tenant ('Any workspace') distribution via a direct link requires formal review.",
+      "status": "uncertain",
+      "source_ids": [
+        "s1",
+        "s2"
+      ]
+    },
+    {
+      "text": "Missing or improperly validated CSRF state parameters frequently trigger rejection during security QA.",
+      "status": "uncertain",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Rate limits apply per authorization token (per user). Free tier domains are limited to 150 requests per minute; Paid tier domains are limited to 1,500.",
+      "status": "sourced",
+      "source_ids": [
+        "s5"
+      ]
+    },
+    {
+      "text": "Requesting an OAuth scope during authorization that hasn't been explicitly enabled in the Developer Console yields a 'forbidden_scopes' error.",
+      "status": "sourced",
+      "source_ids": [
+        "s3"
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "action": "Read project details",
+      "scopes": [
+        "projects:read"
+      ],
+      "review_impact": "Standard resource scope. No elevated verification or paid tier required. Admin consent is not required by default.",
+      "source_ids": [
+        "s4"
+      ]
+    },
+    {
+      "action": "Create tasks and update task status & properties",
+      "scopes": [
+        "tasks:write"
+      ],
+      "review_impact": "Standard resource scope. No elevated verification or paid tier required. Admin consent is not required by default.",
+      "source_ids": [
+        "s4"
+      ]
+    },
+    {
+      "action": "Manage user assignments",
+      "scopes": [
+        "tasks:write",
+        "users:read"
+      ],
+      "review_impact": "Standard resource scopes. No elevated verification or paid tier required. Admin consent is not required by default.",
+      "source_ids": [
+        "s4"
+      ]
+    },
+    {
+      "action": "Read tasks and current assignments",
+      "scopes": [
+        "tasks:read"
+      ],
+      "review_impact": "Standard resource scope. No elevated verification or paid tier required. Admin consent is not required by default.",
+      "source_ids": [
+        "s4"
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "issue": "API requests return HTTP 429 Too Many Requests.",
+      "how_to_proceed": "Parse the 'Retry-After' header in the response and pause the agent's requests for the indicated number of seconds before retrying."
+    },
+    {
+      "issue": "OAuth flow returns a 'forbidden_scopes' error.",
+      "how_to_proceed": "Log into the Developer Console, navigate to 'OAuth > Permission scopes', and explicitly enable the requested scopes."
+    },
+    {
+      "issue": "App Directory submission rejected for text or vocabulary failures.",
+      "how_to_proceed": "Rewrite the app description to exceed 250 characters, remove Asana-specific terminology (like 'tasks' or 'projects') from your UI, and fix any typographical errors."
+    }
+  ],
+  "agent_can": [
+    "Configure the OAuth authorization URL with PKCE and the state parameter",
+    "Test the token exchange and API endpoints within an approved workspace",
+    "Draft the minimum 250-character app description and privacy policy text",
+    "Handle HTTP 429 rate limit responses by backing off based on the Retry-After header"
+  ],
+  "you_must": [
+    "Register the application in the Asana Developer Console to retrieve the client_id and client_secret",
+    "Provide verified company information and host the privacy policy on a public URL",
+    "Record and upload a screencast video demonstrating the app for directory review",
+    "Ensure your Asana account has access to the workspace(s) you wish to test with"
+  ],
+  "key_claims": [
+    {
+      "text": "The Asana authorization endpoint (https://app.asana.com/-/oauth_authorize) is active and reachable.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "Asana's OAuth flow supports PKCE with the S256 challenge method.",
+      "status": "tested",
+      "source_ids": [
+        "s3"
+      ]
+    },
+    {
+      "text": "No payment or partner program enrollment is required to build or distribute an OAuth app.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Initial response time for app review submissions is roughly one week.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    }
+  ],
+  "open_questions": [
+    "Does choosing 'Any workspace' for unlisted distribution truly allow external access without a formal app review, given the conflicting statements in the documentation?"
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Publish Your App",
+      "url": "https://developers.asana.com/docs/publish-your-app"
+    },
+    {
+      "id": "s2",
+      "title": "Share Your App",
+      "url": "https://developers.asana.com/docs/share-your-app"
+    },
+    {
+      "id": "s3",
+      "title": "OAuth Documentation",
+      "url": "https://developers.asana.com/docs/oauth"
+    },
+    {
+      "id": "s4",
+      "title": "OAuth Scopes",
+      "url": "https://developers.asana.com/docs/oauth-scopes"
+    },
+    {
+      "id": "s5",
+      "title": "Rate Limits",
+      "url": "https://developers.asana.com/docs/rate-limits"
+    }
+  ],
+  "slug": "asana",
+  "probes": [
+    {
+      "check": "discovery",
+      "request": "GET https://app.asana.com/.well-known/openid-configuration",
+      "result": "HTTP 404, no metadata"
+    },
+    {
+      "check": "discovery",
+      "request": "GET https://app.asana.com/.well-known/oauth-authorization-server",
+      "result": "HTTP 200; PKCE ['S256']; dynamic registration not listed"
+    }
+  ],
+  "warnings": [
+    "Rated easy but has a blocking provider stage; check the difficulty."
+  ],
+  "origin": "seed",
+  "models": [
+    "gemini-3.1-pro-preview",
+    "gemini-3.8-flash"
+  ],
+  "search_providers": [
+    "gemini"
+  ],
+  "generated_at": "2026-11-01T13:52:05+00:00",
+  "verified_note": ""
+}

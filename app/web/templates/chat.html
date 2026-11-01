@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block body_class %}app{% endblock %}
+{% block body %}
+<div class="layout" id="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="side-top">
+      <a href="/" class="brand"><span class="logo"></span>OAuth App Guides</a>
+      <button class="icon-btn" id="hide-sidebar" aria-label="Hide sidebar">⟨</button>
+    </div>
+    <button class="new-chat" id="new-chat">＋ New chat</button>
+    <div class="side-section">Recent chats</div>
+    <ul class="side-list" id="chat-list"><li class="muted small empty">No chats yet</li></ul>
+    <div class="side-section">Guide library</div>
+    <ul class="side-list">
+      {% for r in rows %}
+      <li><button data-open="{{ r.slug }}" data-name="{{ r.name }}" data-difficulty="{{ r.difficulty }}" data-wait="{{ r.data.approval_wait }}" data-website="{{ r.data.website }}">
+        <img src="{{ r.data.website | favicon }}" alt="" width="14" height="14"> {{ r.name }} <span class="dot {{ r.difficulty }}" title="{{ r.difficulty }}"></span>
+      </button></li>
+      {% endfor %}
+    </ul>
+  </nav>
+
+  <section class="chat">
+    <header class="top">
+      <button class="icon-btn" id="show-sidebar" aria-label="Show sidebar">☰</button>
+      <span class="chat-title" id="chat-title"></span>
+    </header>
+
+    <div class="thread" id="thread">
+      <div class="welcome" id="welcome">
+        <h1>Which app do your users need to connect?</h1>
+        <p class="muted">Name an app, or describe what your agent needs to do. You'll get a guide to creating and approving your own OAuth app: effort, approval wait, permissions, and what an agent can do for you.</p>
+        <div class="starters">
+          <button data-prompt="I'm building an AI project management assistant. It needs to read projects, create tasks, update their status and manage assignments. Which service should I use, which permissions do I need, and is provider approval required?">🗂️ <span>Project management assistant: which service and permissions?</span></button>
+          <button data-prompt="Gmail">✉️ <span>Gmail: how long does Google verification take?</span></button>
+          <button data-prompt="My agent books meetings for sales reps. Which calendar should I connect and what approval do I need?">📅 <span>Meeting-booking agent: which calendar?</span></button>
+          <button data-prompt="salesforce.com">☁️ <span>salesforce.com</span></button>
+        </div>
+      </div>
+    </div>
+
+    <form class="composer" id="composer">
+      <textarea id="query" rows="1" placeholder="Name an app (e.g. Zoho CRM) or describe what your agent needs to do…" maxlength="2000" required></textarea>
+      <button type="submit" aria-label="Send" title="Send">↑</button>
+    </form>
+  </section>
+
+  <aside class="canvas" id="canvas" hidden>
+    <header class="canvas-bar">
+      <div class="canvas-title" id="canvas-title"></div>
+      <div class="canvas-actions">
+        <button class="ghost-btn" id="copy-link">Copy link</button>
+        <div class="menu">
+          <button class="ghost-btn" id="export-btn" aria-haspopup="true">Export ▾</button>
+          <div class="menu-list" id="export-menu" hidden>
+            <a data-fmt="md">Markdown (.md)</a>
+            <a data-fmt="pdf">PDF (.pdf)</a>
+            <a data-fmt="docx">Word (.docx)</a>
+            <a data-fmt="html">HTML page</a>
+            <a data-fmt="json">JSON</a>
+            <a data-fmt="copy-md">Copy as Markdown</a>
+          </div>
+        </div>
+        <button class="icon-btn" id="full-canvas" aria-label="Full screen" title="Full screen">⤢</button>
+        <button class="icon-btn" id="close-canvas" aria-label="Close">✕</button>
+      </div>
+    </header>
+    <div class="canvas-body" id="canvas-body"></div>
+  </aside>
+</div>
+{% endblock %}

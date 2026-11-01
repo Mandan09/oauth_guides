@@ -1,0 +1,386 @@
+{
+  "app": "Keka",
+  "provider": "Keka Technologies Pvt. Ltd.",
+  "website": "https://www.keka.com",
+  "category": "HRIS",
+  "difficulty": "moderate",
+  "headline": "Multi-tenant OAuth requires mandatory Sandbox approval and a 2-3 week marketplace review, but independent security audits are not required.",
+  "summary": "Developers can immediately use direct API keys for single-tenant internal integrations. To build a multi-tenant OAuth app for external Keka customers, developers must register on the Keka App Portal, request a Sandbox workspace, and undergo a 2-3 week marketplace review. A strict technical requirement during external installation is marking the app status as installed via API within 5 minutes of the initial callback, or Keka will automatically fail the installation.",
+  "hands_on_time": "3-5 days",
+  "approval_wait": "2-3 weeks",
+  "time_to_first_connection": "1-5 days",
+  "time_to_production": "3-4 weeks",
+  "oauth": {
+    "developer_portal": "https://developers.keka.com",
+    "docs_url": "https://developers.keka.com/reference/authentication",
+    "authorize_url": "https://login.keka.com/connect/authorize",
+    "token_url": "https://login.keka.com/connect/token",
+    "pkce": "Not enforced; relies on client_secret server-to-server exchange",
+    "refresh_tokens": "Supported via grant_type=refresh_token",
+    "redirect_uri_rules": "Strict exact match requirement pre-registered in the App Portal",
+    "scopes": "kekaapi for token generation, with granular functional scopes like 'Employee And Org Information' managed via API key settings"
+  },
+  "stages": [
+    {
+      "name": "Internal Integration and Testing (Optional)",
+      "duration": "1 hour",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Generate Internal API Keys",
+          "detail": "If building for a single workspace, a Global Admin can generate API keys directly in Global Settings -> Integrations and Automation -> API Access.",
+          "owner": "you",
+          "duration": "15 minutes",
+          "source_ids": [
+            "s1"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Sandbox Account Approval",
+      "duration": "1-3 days",
+      "blocking": true,
+      "steps": [
+        {
+          "title": "Request Sandbox Account",
+          "detail": "Submit a request for a Sandbox Account via the Keka App Portal to test OAuth 2.0 flows against a demo environment.",
+          "owner": "you",
+          "duration": "15 minutes",
+          "source_ids": [
+            "s2"
+          ]
+        },
+        {
+          "title": "Wait for Sandbox Activation",
+          "detail": "Keka team must approve the Sandbox request before development credentials can connect to the test workspace (login.kekademo.com).",
+          "owner": "provider",
+          "duration": "1-3 days",
+          "source_ids": [
+            "s2"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "App Development & Technical Requirements",
+      "duration": "2-4 days",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Implement Authorization Code Flow",
+          "detail": "Build the OAuth flow. Ensure the backend can exchange the authorization code for an access token within the 5-minute limit.",
+          "owner": "agent",
+          "duration": "1 day",
+          "source_ids": [
+            "s3",
+            "s4"
+          ]
+        },
+        {
+          "title": "Implement App Installation Callback",
+          "detail": "Ensure the integration calls Keka's 'Mark App status' endpoint with status '2' (installed) within 5 minutes of receiving the OAuth callback, or the installation is automatically marked as failed.",
+          "owner": "agent",
+          "duration": "1 day",
+          "source_ids": [
+            "s2"
+          ]
+        },
+        {
+          "title": "Prepare Setup Documentation",
+          "detail": "Write comprehensive step-by-step setup documentation explaining how customer admins configure and integrate the app.",
+          "owner": "agent",
+          "duration": "1 day",
+          "source_ids": [
+            "s2"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Marketplace Review and Approval",
+      "duration": "2-3 weeks",
+      "blocking": true,
+      "steps": [
+        {
+          "title": "Submit Listing and App for Review",
+          "detail": "Submit app details (name, descriptions, screenshots, setup docs) and technical configs on the App Portal.",
+          "owner": "you",
+          "duration": "1 hour",
+          "source_ids": [
+            "s2"
+          ]
+        },
+        {
+          "title": "Wait for Partner Review",
+          "detail": "The Keka partner team reviews the app for security, permissions, and functionality.",
+          "owner": "provider",
+          "duration": "2-3 weeks",
+          "source_ids": [
+            "s2"
+          ]
+        },
+        {
+          "title": "Live Product Demo",
+          "detail": "Demonstrate the integration's functionality to the Keka review team upon request.",
+          "owner": "you",
+          "duration": "1 hour",
+          "source_ids": [
+            "s2"
+          ]
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "text": "Sandbox environments must be formally requested and approved prior to standard OAuth development.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "The app must call the 'Mark App status' endpoint within 5 minutes of OAuth authorization.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Comprehensive customer-facing setup documentation must be provided in the submission.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Targeting external organizations requires a 2-3 week partner review via the Keka App Portal.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    }
+  ],
+  "gotchas": [
+    {
+      "text": "If your server takes longer than 5 minutes to generate tokens and mark the installation status, Keka fails the install automatically.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Direct API keys are capped at a maximum of 5 active keys per organization.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Rate limits are strictly enforced at 50 requests per minute per integration, returning 429 Too Many Requests if exceeded.",
+      "status": "sourced",
+      "source_ids": [
+        "s7"
+      ]
+    },
+    {
+      "text": "The authorization endpoint validates client credentials properly and redirects to an error page if they are invalid.",
+      "status": "tested",
+      "source_ids": [
+        "s5"
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "action": "Read and write core employee profiles and organizational data",
+      "scopes": [
+        "kekaapi",
+        "Employee And Org Information"
+      ],
+      "review_impact": "Requires Keka tenant admin consent. Contains sensitive PII which may be subject to stricter evaluation during the marketplace review.",
+      "source_ids": [
+        "s3",
+        "s6"
+      ]
+    },
+    {
+      "action": "Read and submit time-off and leave applications",
+      "scopes": [
+        "kekaapi",
+        "Leave"
+      ],
+      "review_impact": "Standard admin consent required. Must justify need in App Portal listing.",
+      "source_ids": [
+        "s3",
+        "s6"
+      ]
+    },
+    {
+      "action": "Read and log employee check-ins and shifts",
+      "scopes": [
+        "kekaapi",
+        "Attendance"
+      ],
+      "review_impact": "Standard admin consent required.",
+      "source_ids": [
+        "s3",
+        "s6"
+      ]
+    },
+    {
+      "action": "Read and submit time tracking logs and project hours",
+      "scopes": [
+        "kekaapi",
+        "Timesheet"
+      ],
+      "review_impact": "Standard admin consent required.",
+      "source_ids": [
+        "s3",
+        "s6"
+      ]
+    },
+    {
+      "action": "Read and update performance goals and reviews",
+      "scopes": [
+        "kekaapi",
+        "Performance"
+      ],
+      "review_impact": "Standard admin consent required.",
+      "source_ids": [
+        "s3",
+        "s6"
+      ]
+    },
+    {
+      "action": "Access payslips and financial salary structures",
+      "scopes": [
+        "kekaapi",
+        "Payroll"
+      ],
+      "review_impact": "Contains highly sensitive financial data; triggers strict review and subject to internal plan restrictions.",
+      "source_ids": [
+        "s3",
+        "s6"
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "issue": "App installations fail immediately after OAuth authorization.",
+      "how_to_proceed": "Ensure your backend calls the 'Mark App status' endpoint with a status of 2 within 5 minutes of receiving the callback code."
+    },
+    {
+      "issue": "API requests consistently return 429 Too Many Requests.",
+      "how_to_proceed": "Implement backoff strategies in your AI agent. Keka enforces a strict 50 requests per minute limit that resets every 60 seconds."
+    }
+  ],
+  "agent_can": [
+    "Implement the OAuth authorization code flow and refresh token logic",
+    "Develop the required webhook or API call to the 'Mark App status' endpoint within the 5-minute window",
+    "Draft the required customer-facing setup documentation",
+    "Draft listing details and descriptions for the marketplace submission",
+    "Handle HTTP 429 rate limit backoff logic (50 req/min)"
+  ],
+  "you_must": [
+    "Register as a developer on the Keka App Portal",
+    "Submit the Sandbox Workspace request",
+    "Submit the final app for marketplace publication",
+    "Attend a live product demo with the Keka partner review team if requested"
+  ],
+  "key_claims": [
+    {
+      "text": "OIDC discovery is available and valid on login.keka.com.",
+      "status": "tested",
+      "source_ids": [
+        "s5"
+      ]
+    },
+    {
+      "text": "The developer portal is live and accessible at developers.keka.com.",
+      "status": "tested",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Keka app marketplace review typically takes 2-3 weeks.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "There are no listing or application fees for publishing an app.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    }
+  ],
+  "open_questions": [
+    "Will a live product demo definitely be mandated for this specific AI agent integration, or is it evaluated on a case-by-case basis?"
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "How can an admin create an API access key on Keka",
+      "url": "https://help.keka.com/hc/en-us/articles/39946599180177-How-can-an-admin-create-an-API-access-key-on-Keka"
+    },
+    {
+      "id": "s2",
+      "title": "How to create your first App or Service on Keka App Portal",
+      "url": "https://developers.keka.com/docs/how-to-create-your-first-app-or-service-on-keka-app-portal"
+    },
+    {
+      "id": "s3",
+      "title": "Keka API Authentication",
+      "url": "https://developers.keka.com/reference/authentication"
+    },
+    {
+      "id": "s4",
+      "title": "App Portal Access Token Generation",
+      "url": "https://developers.keka.com/reference/app-portal-access-token-generation"
+    },
+    {
+      "id": "s5",
+      "title": "Keka SSO Integration (Keka as Identity Provider)",
+      "url": "https://developers.keka.com/reference/keka-sso-integration-keka-as-identity-provider"
+    },
+    {
+      "id": "s6",
+      "title": "Keka API Scopes",
+      "url": "https://developers.keka.com/reference/scope"
+    },
+    {
+      "id": "s7",
+      "title": "Keka API Rate Limit",
+      "url": "https://developers.keka.com/reference/rate-limit"
+    }
+  ],
+  "slug": "keka",
+  "probes": [
+    {
+      "check": "discovery",
+      "request": "GET https://login.keka.com/.well-known/openid-configuration",
+      "result": "HTTP 200; PKCE ['plain', 'S256']; dynamic registration not listed"
+    },
+    {
+      "check": "authorize",
+      "request": "GET https://login.keka.com/connect/authorize (fake client_id)",
+      "result": "HTTP 200, landed on login.keka.com; error hints: none"
+    }
+  ],
+  "warnings": [],
+  "origin": "seed",
+  "models": [
+    "gemini-3.1-pro-preview",
+    "gemini-3.8-flash"
+  ],
+  "search_providers": [
+    "gemini"
+  ],
+  "generated_at": "2026-11-01T14:27:10+00:00",
+  "verified_note": ""
+}

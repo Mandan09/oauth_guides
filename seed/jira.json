@@ -1,0 +1,285 @@
+{
+  "app": "Jira",
+  "provider": "Atlassian",
+  "website": "https://www.atlassian.com/software/jira",
+  "category": "Project Management",
+  "difficulty": "moderate",
+  "headline": "External sharing is immediate without review, though formal approval taking several days is recommended to remove the unapproved app warning.",
+  "summary": "Atlassian provides a highly accessible OAuth 2.0 (3LO) setup for Jira. Developers can create an app, toggle it to 'Sharing', and allow arbitrary external users to connect immediately. End-users will see an 'unapproved app' warning banner until the developer submits the app for a formal, free review. API calls require an extra resource discovery step to route requests via the user's specific cloudId.",
+  "hands_on_time": "2 to 4 hours",
+  "approval_wait": "Several business days to 2 weeks",
+  "time_to_first_connection": "Immediate",
+  "time_to_production": "Immediate for unapproved sharing, 1 to 2 weeks for approved listing",
+  "oauth": {
+    "developer_portal": "https://developer.atlassian.com/",
+    "docs_url": "https://developer.atlassian.com/cloud/jira/service-desk/oauth-2-authorization-code-grants-3lo-for-apps/",
+    "authorize_url": "https://auth.atlassian.com/authorize",
+    "token_url": "https://auth.atlassian.com/oauth/token",
+    "pkce": "Discovery metadata indicates S256 PKCE support, though documentation mandates a confidential client exchange.",
+    "refresh_tokens": "Supported via offline_access scope. Tokens rotate on use with a 10-minute leeway and expire after 90 days of inactivity.",
+    "redirect_uri_rules": "Strict exact match required. Must use HTTPS in production. http://localhost and http://127.0.0.1 are allowed for local dev.",
+    "scopes": "Space-separated list. Atlassian recommends classic scopes (e.g., read:jira-work) and apps should stay below 50 total scopes."
+  },
+  "stages": [
+    {
+      "name": "App Creation and Setup",
+      "duration": "1 hour",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Register OAuth Application",
+          "detail": "Create a new OAuth 2.0 (3LO) integration in the Atlassian Developer Console.",
+          "owner": "you",
+          "duration": "15 minutes",
+          "source_ids": [
+            "s3"
+          ]
+        },
+        {
+          "title": "Configure Scopes and Redirects",
+          "detail": "Add Jira Cloud platform APIs, select classic read/write scopes, and set the callback URL.",
+          "owner": "agent",
+          "duration": "30 minutes",
+          "source_ids": [
+            "s3",
+            "s5"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Self-Service Distribution",
+      "duration": "10 minutes",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Toggle Sharing Setting",
+          "detail": "Navigate to the Distribution tab in the console and toggle the status to Sharing to allow external users to connect immediately.",
+          "owner": "you",
+          "duration": "10 minutes",
+          "source_ids": [
+            "s1"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Optional Approval Review",
+      "duration": "1 to 2 weeks",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Submit for Warning Removal",
+          "detail": "Submit the app via the Marketplace portal as 'not directly installable', providing staging credentials and privacy URLs to remove the unapproved warning.",
+          "owner": "you",
+          "duration": "1 to 2 weeks",
+          "source_ids": [
+            "s1",
+            "s2"
+          ]
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "text": "Integration must be submitted as 'My app isn't directly installable' when seeking approval.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Developer must provide working demo credentials, a staging account, or step-by-step external access instructions for reviewers.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "App must provide public Privacy Policy and Terms of Service URLs.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "App name and assets must not start with 'Jira' or use unmodified Atlassian logos.",
+      "status": "uncertain",
+      "source_ids": [
+        "s2"
+      ]
+    }
+  ],
+  "gotchas": [
+    {
+      "text": "API requests require discovering the user's accessible cloudId first via the accessible-resources endpoint.",
+      "status": "sourced",
+      "source_ids": [
+        "s3"
+      ]
+    },
+    {
+      "text": "Refresh tokens are automatically rotated upon use; relying on a static refresh token will break the integration.",
+      "status": "sourced",
+      "source_ids": [
+        "s4"
+      ]
+    },
+    {
+      "text": "End-users will be presented with a prominent 'unapproved app' warning banner until the Atlassian review is completed.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "action": "View Jira projects, issues, worklogs, and execute JQL searches",
+      "scopes": [
+        "read:jira-work"
+      ],
+      "review_impact": "Does not require site admin consent for standard data access; user can consent directly.",
+      "source_ids": [
+        "s5"
+      ]
+    },
+    {
+      "action": "Create and edit issues, add comments, and manage worklogs",
+      "scopes": [
+        "write:jira-work"
+      ],
+      "review_impact": "Does not require site admin consent for standard user actions.",
+      "source_ids": [
+        "s5"
+      ]
+    },
+    {
+      "action": "View user profile information such as names and avatars",
+      "scopes": [
+        "read:jira-user"
+      ],
+      "review_impact": "Standard user consent.",
+      "source_ids": [
+        "s5"
+      ]
+    },
+    {
+      "action": "Obtain refresh tokens for background, unattended access",
+      "scopes": [
+        "offline_access"
+      ],
+      "review_impact": "Standard user consent.",
+      "source_ids": [
+        "s4"
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "issue": "API returns HTTP 429 Too Many Requests due to rate limits",
+      "how_to_proceed": "Implement exponential back-off and pause requests for the duration indicated by the Retry-After header in the response."
+    },
+    {
+      "issue": "Atlassian reviewer rejects app due to broken OAuth flow",
+      "how_to_proceed": "Ensure you have provided a fully configured staging account with clear step-by-step instructions so the reviewer can complete end-to-end OAuth verification."
+    }
+  ],
+  "agent_can": [
+    "Test token exchange endpoints and implement cloudId resource discovery",
+    "Draft privacy policy and terms of service documents for submission",
+    "Configure request headers and handle refresh token rotation logic"
+  ],
+  "you_must": [
+    "Register the developer account and create the app in the Atlassian Console",
+    "Toggle the distribution status to 'Sharing' to enable external access",
+    "Submit the application for formal review to remove the unapproved warning banner"
+  ],
+  "key_claims": [
+    {
+      "text": "The Atlassian OAuth discovery metadata includes valid configuration and S256 PKCE support.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "The authorization endpoint successfully blocks requests with invalid client IDs and redirect URIs.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "Atlassian allows immediate external sharing of unapproved OAuth 3LO apps without any hard user quotas.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Formal review to remove the unapproved warning banner is free and typically takes days to a couple of weeks.",
+      "status": "sourced",
+      "source_ids": [
+        "s1",
+        "s2"
+      ]
+    }
+  ],
+  "open_questions": [
+    "Are there any undocumented burst rate limit caps specifically applied to unapproved applications?"
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Managing OAuth Apps",
+      "url": "https://developer.atlassian.com/cloud/oauth/getting-started/managing-oauth-apps/"
+    },
+    {
+      "id": "s2",
+      "title": "Listing a Third-Party Integration",
+      "url": "https://developer.atlassian.com/platform/marketplace/knowledge-base/listing-a-third-party-integration-on-the-atlassian-marketplace/"
+    },
+    {
+      "id": "s3",
+      "title": "OAuth 2.0 (3LO) apps",
+      "url": "https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/"
+    },
+    {
+      "id": "s4",
+      "title": "Refresh Tokens",
+      "url": "https://developer.atlassian.com/cloud/oauth/getting-started/refresh-tokens/"
+    },
+    {
+      "id": "s5",
+      "title": "Scopes for OAuth 2.0 apps",
+      "url": "https://developer.atlassian.com/cloud/jira/platform/scopes-for-oauth-2-3LO-and-forge-apps/"
+    },
+    {
+      "id": "s6",
+      "title": "OAuth 2 Authorization Code Grants",
+      "url": "https://developer.atlassian.com/cloud/jira/service-desk/oauth-2-authorization-code-grants-3lo-for-apps/"
+    }
+  ],
+  "slug": "jira",
+  "probes": [
+    {
+      "check": "discovery",
+      "request": "GET https://auth.atlassian.com/.well-known/openid-configuration",
+      "result": "HTTP 200; PKCE ['S256']; dynamic registration yes"
+    },
+    {
+      "check": "authorize",
+      "request": "GET https://auth.atlassian.com/authorize (fake client_id)",
+      "result": "HTTP 202, landed on id.atlassian.com; error hints: ['client_id', 'redirect_uri']"
+    }
+  ],
+  "warnings": [],
+  "origin": "seed",
+  "models": [
+    "gemini-3.1-pro-preview",
+    "gemini-3.8-flash"
+  ],
+  "search_providers": [
+    "gemini"
+  ],
+  "generated_at": "2026-11-01T14:03:55+00:00",
+  "verified_note": ""
+}

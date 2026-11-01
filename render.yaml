@@ -1,0 +1,20 @@
+# Render Blueprint: New → Blueprint → pick this repo. Secrets marked sync: false are asked for once.
+services:
+  - type: web
+    name: oauth-guides
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DATABASE_URL  # Neon connection string; postgresql://... is converted for asyncpg
+        sync: false
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ g.app }} OAuth app setup & approval guide{% endblock %}
+{% block description %}{{ g.headline }}{% endblock %}
+{% block body_class %}page{% endblock %}
+{% block body %}
+<header class="top">
+  <a href="/" class="brand"><span class="logo"></span>OAuth App Guides</a>
+  <div class="canvas-actions">
+    <a class="ghost-btn" href="/g/{{ g.slug }}.md">Markdown</a>
+    <a class="ghost-btn" href="/g/{{ g.slug }}.pdf">PDF</a>
+    <a class="ghost-btn" href="/g/{{ g.slug }}.docx">Word</a>
+  </div>
+</header>
+<main class="page-main">{% include "_guide.html" %}</main>
+{% endblock %}

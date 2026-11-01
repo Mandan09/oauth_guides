@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: oauth_guides
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      retries: 10
+
+  app:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/oauth_guides
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/srv/app  # local dev: template and static edits apply without a rebuild
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

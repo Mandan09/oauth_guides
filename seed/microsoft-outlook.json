@@ -1,0 +1,391 @@
+{
+  "app": "Microsoft Outlook",
+  "provider": "Microsoft",
+  "website": "https://outlook.live.com",
+  "category": "Email & Calendar",
+  "difficulty": "moderate",
+  "headline": "Connecting internal or personal accounts works immediately, but onboarding external enterprise users practically requires Microsoft Publisher Verification which takes 3 to 5 business days.",
+  "summary": "Microsoft Outlook uses OAuth 2.0 via Microsoft Graph and Microsoft Entra ID. Registering an application is free and self-service in the Entra ID portal. Personal Microsoft accounts and internal test users can consent immediately, though personal users will see an 'unverified' warning. For external enterprise users (B2B), Microsoft's default risk-based policies block end-user consent for unverified apps, making Publisher Verification effectively mandatory for production multi-tenant apps.",
+  "hands_on_time": "2 to 4 hours",
+  "approval_wait": "3 to 5 business days",
+  "time_to_first_connection": "15 minutes",
+  "time_to_production": "1 to 2 weeks",
+  "oauth": {
+    "developer_portal": "https://developer.microsoft.com/graph",
+    "docs_url": "https://learn.microsoft.com/en-us/graph/auth/auth-concepts",
+    "authorize_url": "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize",
+    "token_url": "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token",
+    "pkce": "Supported and recommended for all clients; mandatory for Single Page Applications (SPAs) and public mobile/desktop clients.",
+    "refresh_tokens": "Requires the 'offline_access' scope. Tokens have a rolling inactivity window of 90 days and a default maximum lifetime of until revoked.",
+    "redirect_uri_rules": "Must use https:// scheme (except for localhost development), exact string matching is enforced (no wildcards or query parameters), case-sensitive, max length 256 characters.",
+    "scopes": "User.Read, offline_access, Mail.Read, Mail.ReadWrite, Mail.Send, Mail.ReadBasic"
+  },
+  "stages": [
+    {
+      "name": "App Registration and Configuration",
+      "duration": "1 to 2 hours",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Register App in Entra ID",
+          "detail": "Create the app registration in the Microsoft Entra admin center, selecting the appropriate multi-tenant supported account type.",
+          "owner": "agent",
+          "duration": "15 minutes",
+          "source_ids": [
+            "s11"
+          ]
+        },
+        {
+          "title": "Configure Redirect URIs and Scopes",
+          "detail": "Add standard redirect URIs, generate client secrets, and configure delegated Microsoft Graph permissions (e.g., Mail.Read, User.Read).",
+          "owner": "agent",
+          "duration": "15 minutes",
+          "source_ids": [
+            "s12",
+            "s14"
+          ]
+        },
+        {
+          "title": "Set Publisher Branding",
+          "detail": "Configure the application's Privacy Statement URL, Terms of Service URL, and verified custom domain.",
+          "owner": "you",
+          "duration": "30 minutes",
+          "source_ids": [
+            "s8"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Publisher Verification",
+      "duration": "3 to 5 business days",
+      "blocking": true,
+      "steps": [
+        {
+          "title": "Enroll in MAICPP",
+          "detail": "Enroll in the Microsoft AI Cloud Partner Program (MAICPP) and submit legal entity details for business vetting.",
+          "owner": "you",
+          "duration": "1 hour",
+          "source_ids": [
+            "s2",
+            "s4"
+          ]
+        },
+        {
+          "title": "Wait for Legal Vetting",
+          "detail": "Wait for Microsoft to complete the business identity vetting process in Partner Center.",
+          "owner": "provider",
+          "duration": "3 to 5 business days",
+          "source_ids": [
+            "s4"
+          ]
+        },
+        {
+          "title": "Link Partner ID to App",
+          "detail": "As an Entra ID Application Administrator and MPN Admin with MFA enabled, link the vetted Partner Global Account ID to the app registration.",
+          "owner": "you",
+          "duration": "15 minutes",
+          "source_ids": [
+            "s2"
+          ]
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "text": "An active Microsoft AI Cloud Partner Program (MAICPP) account with an approved Partner Global Account (PGA) PartnerID.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "A DNS-verified custom domain registered in Entra ID that exactly matches the legal entity's web domain vetted in Partner Center.",
+      "status": "sourced",
+      "source_ids": [
+        "s8",
+        "s9"
+      ]
+    },
+    {
+      "text": "Configured Privacy Statement URL and Terms of Service URL in the app registration.",
+      "status": "sourced",
+      "source_ids": [
+        "s8"
+      ]
+    },
+    {
+      "text": "The administrator executing publisher verification must have MFA enabled and hold Application Administrator (or Cloud Application Administrator) in Entra ID and MPN Partner Admin (or Account Admin) in Partner Center.",
+      "status": "sourced",
+      "source_ids": [
+        "s2",
+        "s9"
+      ]
+    }
+  ],
+  "gotchas": [
+    {
+      "text": "OpenID Connect discovery metadata is not published at the standard /common or /common/v2.0 endpoints.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "Without Publisher Verification, external enterprise (Entra ID) users will see a 'Need admin approval' block by default due to Microsoft's risk-based step-up policies.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Application permissions (daemon or service-to-service access without a user present) always strictly require Tenant Administrator Consent, regardless of Publisher Verification.",
+      "status": "sourced",
+      "source_ids": [
+        "s3"
+      ]
+    },
+    {
+      "text": "Microsoft Graph enforces rate limits of 10,000 API requests per 10-minute period per app/mailbox pair.",
+      "status": "sourced",
+      "source_ids": [
+        "s15"
+      ]
+    },
+    {
+      "text": "Discrepancies between the legal entity names/addresses on official utility bills and the Partner Center profile can cause vetting delays or rejection.",
+      "status": "sourced",
+      "source_ids": [
+        "s10"
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "action": "Authenticate users, read basic profile, and maintain offline access",
+      "scopes": [
+        "User.Read",
+        "offline_access"
+      ],
+      "review_impact": "End-users can self-consent, but B2B enterprise users will be blocked unless the app completes Publisher Verification.",
+      "source_ids": [
+        "s3",
+        "s12"
+      ],
+      "status": "sourced"
+    },
+    {
+      "action": "Read emails",
+      "scopes": [
+        "Mail.Read"
+      ],
+      "review_impact": "End-users can self-consent as a delegated permission. Blocked for B2B users without Publisher Verification. As an Application permission, strictly requires Tenant Administrator Consent.",
+      "source_ids": [
+        "s3"
+      ],
+      "status": "sourced"
+    },
+    {
+      "action": "Send emails on behalf of the user",
+      "scopes": [
+        "Mail.Send"
+      ],
+      "review_impact": "End-users can self-consent. Blocked for B2B users without Publisher Verification.",
+      "source_ids": [
+        "s3"
+      ],
+      "status": "sourced"
+    },
+    {
+      "action": "Create, read, update, or delete emails",
+      "scopes": [
+        "Mail.ReadWrite"
+      ],
+      "review_impact": "End-users can self-consent. Blocked for B2B users without Publisher Verification.",
+      "source_ids": [
+        "s3"
+      ],
+      "status": "sourced"
+    }
+  ],
+  "blockers": [
+    {
+      "issue": "Users see a 'Need admin approval' screen and cannot connect their work/school accounts.",
+      "how_to_proceed": "You must complete Publisher Verification in Microsoft Partner Center. Until then, a tenant administrator for that user's organization must explicitly grant tenant-wide consent to your app."
+    },
+    {
+      "issue": "Publisher Verification fails with error MPNAccountNotVetted.",
+      "how_to_proceed": "Wait for Microsoft to finish checking your legal entity documents in Partner Center, or check the Partner Center portal to see if additional utility bills/business documents are requested."
+    },
+    {
+      "issue": "Publisher Verification fails with error MPNAccountNotFoundOrNoAccess.",
+      "how_to_proceed": "Ensure you are using the Partner Global Account (PGA) ID, not a Location ID. Verify your signed-in user has MFA enabled, holds the Application Administrator role in Entra ID, and holds the MPN Partner Admin role in Partner Center."
+    }
+  ],
+  "agent_can": [
+    "Register the application in Microsoft Entra ID and generate client credentials",
+    "Configure API permissions, redirect URIs, and token settings",
+    "Draft the Terms of Service and Privacy Policy required for branding",
+    "Test the authorization and token exchange flow using internal test accounts"
+  ],
+  "you_must": [
+    "Verify your DNS domain ownership in Entra ID",
+    "Create a Microsoft AI Cloud Partner Program (MAICPP) account",
+    "Submit official legal documents (e.g., utility bills, incorporation docs) for business verification",
+    "Link your Partner Global Account ID to the Entra ID application with an MFA-enabled admin account"
+  ],
+  "key_claims": [
+    {
+      "text": "Publisher verification is effectively mandatory for multi-tenant apps connecting commercial Microsoft 365 accounts due to risk-based step-up policies.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Microsoft Graph authorization endpoints are active, though OIDC discovery metadata is not published at the root /common paths.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "Refresh tokens have a rolling inactivity window of 90 days and default to a maximum lifetime of 'until revoked'.",
+      "status": "sourced",
+      "source_ids": [
+        "s13"
+      ]
+    },
+    {
+      "text": "Publisher Verification is free and typical business vetting in Partner Center takes 3 to 5 business days.",
+      "status": "sourced",
+      "source_ids": [
+        "s2",
+        "s4"
+      ]
+    }
+  ],
+  "open_questions": [
+    "Exact processing time if legal documents are rejected and require manual appeal in Partner Center."
+  ],
+  "assumptions": [
+    "Hands-on time is our estimate, not published by the provider.",
+    "The primary use case targets external B2B multi-tenant users, which necessitates Publisher Verification.",
+    "Review time is based on Microsoft's stated typical vetting times, though anecdotal evidence suggests it can take longer if document details do not match exactly."
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Permissions and consent in the Microsoft identity platform",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/permissions-consent-overview"
+    },
+    {
+      "id": "s2",
+      "title": "Publisher verification overview",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview"
+    },
+    {
+      "id": "s3",
+      "title": "Microsoft Graph permissions reference",
+      "url": "https://learn.microsoft.com/en-us/graph/permissions-reference"
+    },
+    {
+      "id": "s4",
+      "title": "Verify your account information in Partner Center",
+      "url": "https://learn.microsoft.com/en-us/partner-center/enroll/understand-the-verification-process"
+    },
+    {
+      "id": "s5",
+      "title": "Publisher Attestation for Microsoft 365",
+      "url": "https://learn.microsoft.com/en-us/microsoft-365-app-certification/docs/attestation"
+    },
+    {
+      "id": "s6",
+      "title": "Microsoft 365 Certification",
+      "url": "https://learn.microsoft.com/en-us/microsoft-365-app-certification/docs/certification"
+    },
+    {
+      "id": "s7",
+      "title": "Submit your app to the Entra ID App Gallery",
+      "url": "https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/v2-howto-app-gallery-listing"
+    },
+    {
+      "id": "s8",
+      "title": "Configure an app's publisher domain",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/howto-configure-publisher-domain"
+    },
+    {
+      "id": "s9",
+      "title": "Troubleshoot publisher verification",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/troubleshoot-publisher-verification"
+    },
+    {
+      "id": "s10",
+      "title": "Q&A: Publisher verification fails with MPN ID has not completed vetting",
+      "url": "https://learn.microsoft.com/en-us/answers/questions/6037926/publisher-verification-fails-with-mpn-id-has-not-c"
+    },
+    {
+      "id": "s11",
+      "title": "Quickstart: Register an application with the Microsoft identity platform",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app"
+    },
+    {
+      "id": "s12",
+      "title": "Microsoft identity platform and OAuth 2.0 authorization code flow",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow"
+    },
+    {
+      "id": "s13",
+      "title": "Configurable token lifetimes in the Microsoft identity platform",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/configurable-token-lifetimes"
+    },
+    {
+      "id": "s14",
+      "title": "Redirect URI (reply URL) restrictions and limitations",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/reply-url"
+    },
+    {
+      "id": "s15",
+      "title": "Microsoft Graph throttling guidance",
+      "url": "https://learn.microsoft.com/en-us/graph/throttling-limits"
+    },
+    {
+      "id": "s16",
+      "title": "Authentication and authorization basics for Microsoft Graph",
+      "url": "https://learn.microsoft.com/en-us/graph/auth/auth-concepts"
+    }
+  ],
+  "slug": "microsoft-outlook",
+  "probes": [
+    {
+      "check": "discovery",
+      "request": "GET https://login.microsoftonline.com/.well-known/openid-configuration",
+      "result": "HTTP 404, no metadata"
+    },
+    {
+      "check": "discovery",
+      "request": "GET https://login.microsoftonline.com/.well-known/oauth-authorization-server",
+      "result": "HTTP 404, no metadata"
+    },
+    {
+      "check": "discovery",
+      "request": "GET https://login.microsoftonline.com/.well-known/openid-configuration",
+      "result": "HTTP 404, no metadata"
+    },
+    {
+      "check": "discovery",
+      "request": "GET https://login.microsoftonline.com/.well-known/oauth-authorization-server",
+      "result": "HTTP 404, no metadata"
+    }
+  ],
+  "warnings": [
+    "Source s11 was cited but not opened or returned by search in this run: https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app"
+  ],
+  "origin": "seed",
+  "models": [
+    "gemini-3.1-pro-preview",
+    "gemini-3.8-flash"
+  ],
+  "search_providers": [
+    "gemini"
+  ],
+  "generated_at": "2026-11-01T14:55:24+00:00",
+  "verified_note": ""
+}

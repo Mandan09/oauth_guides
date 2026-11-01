@@ -1,0 +1,32 @@
+[project]
+name = "oauth-guides"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "google-adk>=2.13",
+    "litellm",
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlalchemy[asyncio]",
+    "asyncpg",
+    "aiosqlite",
+    "jinja2",
+    "httpx",
+    "beautifulsoup4",
+    "ddgs",
+    "pydantic-settings",
+    "python-docx",
+    "fpdf2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio"]
+
+[tool.fastapi]
+entrypoint = "app.main:app"
+
+[tool.setuptools]
+packages = []
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

@@ -1,0 +1,336 @@
+{
+  "app": "HubSpot",
+  "provider": "HubSpot, Inc.",
+  "website": "https://www.hubspot.com",
+  "category": "CRM",
+  "difficulty": "moderate",
+  "headline": "Start immediately with up to 25 production accounts, but scaling requires 3 active external installs and a 10-day Marketplace review.",
+  "summary": "HubSpot allows immediate external OAuth distribution with a hard cap of 25 customer portals and an unverified app warning. To scale further and remove the warning, you must undergo a free Marketplace review taking up to 10 business days. AI agents must specifically enforce user-level permissions or integrate via HubSpot's Model Context Protocol (MCP) server.",
+  "hands_on_time": "2-4 hours",
+  "approval_wait": "Up to 10 business days",
+  "time_to_first_connection": "Immediate",
+  "time_to_production": "Immediate for first 25 installs; ~2 weeks for Marketplace listing to lift caps",
+  "oauth": {
+    "developer_portal": "https://developers.hubspot.com",
+    "docs_url": "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/authentication/oauth/working-with-oauth",
+    "authorize_url": "https://app.hubspot.com/oauth/authorize",
+    "token_url": "https://api.hubapi.com/oauth/v3/token",
+    "pkce": "Supported (S256) and strictly mandated for native integrations and remote MCP server connections.",
+    "refresh_tokens": "Refresh tokens do not expire automatically. Access tokens are short-lived and expire after 30 minutes.",
+    "redirect_uri_rules": "Must use https:// (except localhost), require valid domain names (no raw IPs), and match registered URLs exactly (up to 20 supported).",
+    "scopes": "Space-separated strings. Optional scopes are silently dropped from the grant if the connecting account lacks tier access."
+  },
+  "stages": [
+    {
+      "name": "App Registration & Zero-Review Distribution",
+      "duration": "1-2 hours",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Create Developer Account & App",
+          "detail": "Sign up for a HubSpot Developer Account, create a new project or app, and retrieve your Client ID and Client Secret.",
+          "owner": "you",
+          "duration": "15 minutes",
+          "source_ids": [
+            "s1"
+          ]
+        },
+        {
+          "title": "Configure OAuth Settings",
+          "detail": "Define redirect URIs and scopes in the developer portal or app-hsmeta.json. Ensure redirect URIs are strictly HTTPS.",
+          "owner": "agent",
+          "duration": "30 minutes",
+          "source_ids": [
+            "s1"
+          ]
+        },
+        {
+          "title": "Test Authorization Flow",
+          "detail": "Initiate the OAuth flow. Connecting users must be Super Admins or have Marketplace Access permissions.",
+          "owner": "agent",
+          "duration": "30 minutes",
+          "source_ids": [
+            "s1"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Beta Distribution (The 3-Install Prerequisite)",
+      "duration": "1-4 weeks",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Acquire 3 Production Installs",
+          "detail": "Distribute your app to at least 3 unique, external production accounts. Unlisted marketplace apps are capped at 25 installs.",
+          "owner": "you",
+          "duration": "1-4 weeks",
+          "source_ids": [
+            "s2",
+            "s4"
+          ]
+        },
+        {
+          "title": "Generate API Activity",
+          "detail": "Ensure there is active API or webhook activity across the 3 production accounts in the rolling past 30 days to qualify for review.",
+          "owner": "agent",
+          "duration": "30 days",
+          "source_ids": [
+            "s4"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Marketplace Listing Review",
+      "duration": "10 business days",
+      "blocking": true,
+      "steps": [
+        {
+          "title": "Prepare Documentation & URLs",
+          "detail": "Host a dedicated setup guide, Terms of Service, Privacy Policy, and an Install button landing page. Ensure they allow the HubSpot Crawler.",
+          "owner": "agent",
+          "duration": "2 hours",
+          "source_ids": [
+            "s4"
+          ]
+        },
+        {
+          "title": "Create Shared Data Table",
+          "detail": "Map every requested OAuth scope to a public Shared Data table explaining data flow directionality.",
+          "owner": "agent",
+          "duration": "1 hour",
+          "source_ids": [
+            "s4"
+          ]
+        },
+        {
+          "title": "Accept Partner Agreement & Submit",
+          "detail": "Formally accept the HubSpot Technology Partner Program Agreement and submit the app for ecosystem quality review.",
+          "owner": "you",
+          "duration": "30 minutes",
+          "source_ids": [
+            "s4"
+          ]
+        },
+        {
+          "title": "Await Quality Team Review",
+          "detail": "The HubSpot Ecosystem Quality team reviews the app. If feedback is issued, you have 60 days to remediate.",
+          "owner": "provider",
+          "duration": "10 business days",
+          "source_ids": [
+            "s4"
+          ]
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "text": "Apps submitting for a Marketplace listing must have at least 3 active, unique installs in unaffiliated production accounts with API activity in the past 30 days.",
+      "status": "sourced",
+      "source_ids": [
+        "s4"
+      ]
+    },
+    {
+      "text": "AI connectors must enforce user-level permissions or be built using HubSpot's Model Context Protocol (MCP) Server.",
+      "status": "sourced",
+      "source_ids": [
+        "s4",
+        "s8"
+      ]
+    },
+    {
+      "text": "All submitted public URLs (Privacy Policy, Setup Guide, etc.) must not block the `HubSpot Crawler` user agent.",
+      "status": "sourced",
+      "source_ids": [
+        "s4"
+      ]
+    },
+    {
+      "text": "A public Shared Data table must be provided, mapping every OAuth scope to its data flow directionality.",
+      "status": "sourced",
+      "source_ids": [
+        "s4"
+      ]
+    },
+    {
+      "text": "The app name and logo must not use 'HubSpot', 'Hub', or the sprocket logo.",
+      "status": "sourced",
+      "source_ids": [
+        "s4"
+      ]
+    }
+  ],
+  "gotchas": [
+    {
+      "text": "Unreviewed apps configured for Marketplace distribution are strictly hard-capped at 25 customer portal installs.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Users installing an unreviewed third-party app will encounter an explicit unverified app banner and confirmation dialog.",
+      "status": "sourced",
+      "source_ids": [
+        "s3"
+      ]
+    },
+    {
+      "text": "Access tokens expire quickly after 30 minutes, whereas refresh tokens last indefinitely.",
+      "status": "sourced",
+      "source_ids": [
+        "s1",
+        "s7"
+      ]
+    },
+    {
+      "text": "Public OAuth apps are throttled to 110 requests per 10-second rolling window per installed account.",
+      "status": "sourced",
+      "source_ids": [
+        "s9"
+      ]
+    },
+    {
+      "text": "If a user lacks access to an optional scope (e.g. an Enterprise tool on a Free tier), HubSpot automatically drops the scope from the authorization grant without failing the install.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "OAuth discovery metadata including authorize endpoint, token endpoint, and S256 PKCE support are live and confirmable.",
+      "status": "tested",
+      "source_ids": []
+    }
+  ],
+  "blockers": [
+    {
+      "issue": "Review rejection due to over-scoping.",
+      "how_to_proceed": "Ensure your app only requests scopes that are actively utilized and explicitly documented in your Shared Data table."
+    },
+    {
+      "issue": "Review rejection due to inaccessible URLs.",
+      "how_to_proceed": "Check your firewall or bot-protection services (like Cloudflare) and whitelist the `HubSpot Crawler` user agent for all submitted URLs."
+    },
+    {
+      "issue": "Review rejection due to missing test credentials.",
+      "how_to_proceed": "Provide sandbox test credentials or demo accounts in your developer setup instructions so reviewers can test the OAuth flow end-to-end."
+    }
+  ],
+  "agent_can": [
+    "Draft the Shared Data table mapping OAuth scopes to functionality.",
+    "Draft Privacy Policy and Terms of Service documents.",
+    "Configure redirect URIs and scopes in the developer portal or app-hsmeta.json.",
+    "Perform automated API requests to generate the required 30-day API activity for beta installs.",
+    "Test that all public URLs return HTTP 200 to the `HubSpot Crawler` user agent."
+  ],
+  "you_must": [
+    "Sign up for a HubSpot Developer account and register the app.",
+    "Secure the first 3 active external production installs to meet the Marketplace review prerequisite.",
+    "Accept the HubSpot Technology Partner Program Agreement.",
+    "Submit the app for the final Ecosystem Quality review."
+  ],
+  "key_claims": [
+    {
+      "text": "Marketplace-distributed apps are hard-capped at 25 installs before approval.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "There are no submission or listing fees for OAuth apps in the HubSpot Marketplace.",
+      "status": "sourced",
+      "source_ids": [
+        "s5"
+      ]
+    },
+    {
+      "text": "The HubSpot Developer Platform portal is live and accessible.",
+      "status": "tested",
+      "source_ids": []
+    }
+  ],
+  "open_questions": [
+    "Will reviewers consistently reject apps that lack demo test credentials, as anecdotal community reports suggest?"
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Working with OAuth",
+      "url": "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/authentication/oauth/working-with-oauth"
+    },
+    {
+      "id": "s2",
+      "title": "New Marketplace Distribution App Install Limits",
+      "url": "https://developers.hubspot.com/changelog/new-marketplace-distribution-app-install-limits"
+    },
+    {
+      "id": "s3",
+      "title": "New Confirmation Step for Unverified Third-Party App Installs",
+      "url": "https://developers.hubspot.com/changelog/new-confirmation-step-for-unverified-third-party-app-installs"
+    },
+    {
+      "id": "s4",
+      "title": "App Marketplace Listing Requirements",
+      "url": "https://developers.hubspot.com/docs/apps/developer-platform/list-apps/listing-your-app/app-marketplace-listing-requirements"
+    },
+    {
+      "id": "s5",
+      "title": "Certification Requirements & Costs",
+      "url": "https://developers.hubspot.com/docs/apps/developer-platform/list-apps/apply-for-certification/certification-requirements"
+    },
+    {
+      "id": "s6",
+      "title": "HubSpot Community: App Rejections",
+      "url": "https://community.hubspot.com/t/create-app-and-install-directly-in-only-one-company-without-listing-in-hubspot-marketplace/28309"
+    },
+    {
+      "id": "s7",
+      "title": "Manage OAuth Tokens",
+      "url": "https://developers.hubspot.com/docs/api-reference/latest/authentication/manage-oauth-tokens"
+    },
+    {
+      "id": "s8",
+      "title": "Integrate with the Remote HubSpot MCP Server",
+      "url": "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/integrate-with-the-remote-hubspot-mcp-server"
+    },
+    {
+      "id": "s9",
+      "title": "Platform Usage Guidelines",
+      "url": "https://developers.hubspot.com/docs/developer-tooling/platform/usage-guidelines"
+    }
+  ],
+  "slug": "hubspot",
+  "probes": [
+    {
+      "check": "authorize",
+      "request": "GET https://app.hubspot.com/oauth/authorize (fake client_id)",
+      "result": "HTTP 200, landed on app.hubspot.com; error hints: ['client_id', 'application', 'redirect_uri']"
+    },
+    {
+      "check": "discovery",
+      "request": "GET https://app.hubspot.com/.well-known/openid-configuration",
+      "result": "HTTP 404, no metadata"
+    },
+    {
+      "check": "discovery",
+      "request": "GET https://app.hubspot.com/.well-known/oauth-authorization-server",
+      "result": "HTTP 200; PKCE ['S256']; dynamic registration not listed"
+    }
+  ],
+  "warnings": [],
+  "origin": "seed",
+  "models": [
+    "gemini-3.1-pro-preview",
+    "gemini-3.8-flash"
+  ],
+  "search_providers": [
+    "gemini"
+  ],
+  "generated_at": "2026-11-01T13:40:12+00:00",
+  "verified_note": ""
+}

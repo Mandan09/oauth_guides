@@ -1,0 +1,334 @@
+{
+  "app": "Slack",
+  "provider": "Slack Technologies, LLC",
+  "website": "https://slack.com",
+  "category": "Team Communication",
+  "difficulty": "moderate",
+  "headline": "Deploy instantly to a single workspace or enable unlisted distribution for external users, but expect strict guidelines and up to a 10-week wait for Marketplace listing.",
+  "summary": "Slack supports rapid development within an initial workspace and provides Unlisted Public Distribution for immediate multi-tenant OAuth access. However, getting listed in the Slack Marketplace requires proving active usage across at least 10 workspaces, passing strict security and AI usage guidelines, and completing a functional review that takes up to 10 weeks.",
+  "hands_on_time": "1 to 3 days",
+  "approval_wait": "Instant for Unlisted Public Distribution; up to 10 weeks for Marketplace Functional Review.",
+  "time_to_first_connection": "10 minutes",
+  "time_to_production": "Instant (Unlisted) or up to 10 weeks (Marketplace)",
+  "oauth": {
+    "developer_portal": "https://api.slack.com/apps",
+    "docs_url": "https://api.slack.com/authentication/oauth-v2",
+    "authorize_url": "https://slack.com/oauth/v2/authorize",
+    "token_url": "https://slack.com/api/oauth.v2.access",
+    "pkce": "Supported (SHA-256) and mandatory for custom URI schemes. Enabling PKCE in app settings is an irreversible one-way action.",
+    "refresh_tokens": "Supported. By default, access tokens are long-lived, but enabling token rotation (irreversible) expires them in 12 hours. Refresh tokens are single-use.",
+    "redirect_uri_rules": "Must enforce HTTPS (except localhost) and cannot contain URL fragments (#). The runtime redirect_uri must strictly match a pre-configured URL.",
+    "scopes": "Separated into bot (scope) and user (user_scope) scopes. Sign In With Slack (OpenID Connect) requires separate OAuth flows from standard API scopes."
+  },
+  "stages": [
+    {
+      "name": "Local Development",
+      "duration": "10 minutes",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Create Slack App",
+          "detail": "Register the app in the Developer Portal and select an initial development workspace.",
+          "owner": "you",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s1"
+          ]
+        },
+        {
+          "title": "Install to Workspace",
+          "detail": "Use the 'Install App to Workspace' button to generate a long-lived access token for the development workspace immediately.",
+          "owner": "you",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s2"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Unlisted Public Distribution",
+      "duration": "1 to 3 days",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Configure App Details",
+          "detail": "Set up OAuth settings, ensure all endpoints use HTTPS, and publish a compliant Privacy Policy.",
+          "owner": "agent",
+          "duration": "1 day",
+          "source_ids": [
+            "s2",
+            "s3",
+            "s5"
+          ]
+        },
+        {
+          "title": "Activate Distribution",
+          "detail": "Enable Public Distribution in the App Dashboard to generate shareable installation URLs and enable multi-tenant OAuth.",
+          "owner": "you",
+          "duration": "15 minutes",
+          "source_ids": [
+            "s2",
+            "s3"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Slack Marketplace Listing",
+      "duration": "10 weeks",
+      "blocking": true,
+      "steps": [
+        {
+          "title": "Achieve Active Usage Minimum",
+          "detail": "Acquire active installations in at least 10 different workspaces over the prior 28 days.",
+          "owner": "you",
+          "duration": "Variable",
+          "source_ids": [
+            "s4",
+            "s5"
+          ]
+        },
+        {
+          "title": "Submit Application and Demo",
+          "detail": "Provide a 30-90 second demo video and populated test credentials for the review team.",
+          "owner": "you",
+          "duration": "1 day",
+          "source_ids": [
+            "s4"
+          ]
+        },
+        {
+          "title": "Preliminary and Functional Review",
+          "detail": "Wait up to 10 business days for metadata feedback and up to 10 weeks for full functional and security review.",
+          "owner": "provider",
+          "duration": "10 weeks",
+          "source_ids": [
+            "s4",
+            "s6"
+          ]
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "text": "All public-facing endpoints (OAuth Redirect URLs, interactive Request URLs, Events API endpoints) must enforce HTTPS/SSL.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Apps must host a public Privacy Policy specifying data practices, retention periods, deletion mechanisms, and a direct contact email or form.",
+      "status": "sourced",
+      "source_ids": [
+        "s5"
+      ]
+    },
+    {
+      "text": "Marketplace listing strictly requires the app to be actively used in at least 10 active workspaces prior to submission.",
+      "status": "sourced",
+      "source_ids": [
+        "s4",
+        "s5"
+      ]
+    },
+    {
+      "text": "AI apps must show typing indicators during response generation and include clear hallucination disclaimers.",
+      "status": "sourced",
+      "source_ids": [
+        "s5"
+      ]
+    },
+    {
+      "text": "Apps are strictly prohibited from using Slack message data to train Large Language Models.",
+      "status": "sourced",
+      "source_ids": [
+        "s5"
+      ]
+    },
+    {
+      "text": "Desktop and custom URI redirects using PKCE cannot request bot scopes, only user scopes.",
+      "status": "sourced",
+      "source_ids": [
+        "s8"
+      ]
+    }
+  ],
+  "gotchas": [
+    {
+      "text": "Enabling token rotation or PKCE in the app settings is a permanent, irreversible action.",
+      "status": "sourced",
+      "source_ids": [
+        "s1",
+        "s8"
+      ]
+    },
+    {
+      "text": "Sign In With Slack (OpenID Connect) scopes cannot be combined with standard API scopes in the same OAuth redirect.",
+      "status": "sourced",
+      "source_ids": [
+        "s7"
+      ]
+    },
+    {
+      "text": "Failing the 10-business-day preliminary Marketplace review resets your place in the queue.",
+      "status": "sourced",
+      "source_ids": [
+        "s4"
+      ]
+    },
+    {
+      "text": "Apps lacking immediate onboarding instructions or welcome messages upon installation face rejection.",
+      "status": "sourced",
+      "source_ids": [
+        "s4",
+        "s5"
+      ]
+    },
+    {
+      "text": "Once published in the Marketplace, app configurations are locked, requiring developers to use a separate staging app and endure another 6-10 week review for updates.",
+      "status": "uncertain",
+      "source_ids": [
+        "s4"
+      ]
+    },
+    {
+      "text": "Reviewers frequently reject apps if commands crash when run in channels where the bot has not been explicitly invited.",
+      "status": "uncertain",
+      "source_ids": [
+        "s4"
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "issue": "Cannot submit to Marketplace due to the 10-workspace minimum pre-check.",
+      "how_to_proceed": "Activate Unlisted Public Distribution to onboard external beta customers via OAuth until reaching 10 active workspaces, then submit."
+    },
+    {
+      "issue": "App rejected during review for over-permissioning.",
+      "how_to_proceed": "Remove overly broad scopes (like search:read or admin.*) and ensure every requested scope is visibly utilized in the provided demo video."
+    }
+  ],
+  "agent_can": [
+    "Draft a compliant Privacy Policy and data retention disclosure.",
+    "Configure OAuth endpoints and verify HTTPS compliance.",
+    "Implement the OAuth 2.0 flow, including PKCE code challenge and token rotation logic.",
+    "Add typing indicators and AI disclaimers to comply with Marketplace guidelines."
+  ],
+  "you_must": [
+    "Register the application in the Developer Portal and select a development workspace.",
+    "Activate Unlisted Public Distribution or achieve 10 active workspace installs for Marketplace submission.",
+    "Record a 30-90 second end-to-end demo video for the functional review process.",
+    "Provide trial accounts populated with dummy data for the Slack review team."
+  ],
+  "key_claims": [
+    {
+      "text": "Unlisted Public Distribution enables multi-tenant OAuth for external workspaces immediately without a security audit.",
+      "status": "sourced",
+      "source_ids": [
+        "s2",
+        "s3"
+      ]
+    },
+    {
+      "text": "Slack operates distinct token endpoints for standard OAuth and OpenID Connect (OIDC).",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "The authorize endpoint correctly returns error hints for invalid client IDs.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "The temporary OAuth authorization code expires after 10 minutes.",
+      "status": "sourced",
+      "source_ids": [
+        "s7"
+      ]
+    }
+  ],
+  "open_questions": [
+    "Can an app smoothly transition from Unlisted Distribution to Marketplace listed without prompting existing users to re-authenticate?",
+    "What are the specific triggers for Enterprise Grid admin consent workflows during individual workspace installations?"
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Using Token Rotation",
+      "url": "https://docs.slack.dev/authentication/using-token-rotation/"
+    },
+    {
+      "id": "s2",
+      "title": "App Distribution",
+      "url": "https://docs.slack.dev/app-management/distribution/"
+    },
+    {
+      "id": "s3",
+      "title": "Manage Distribution",
+      "url": "https://api.slack.com/distribution"
+    },
+    {
+      "id": "s4",
+      "title": "Marketplace Review Guide",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide/"
+    },
+    {
+      "id": "s5",
+      "title": "Marketplace App Guidelines and Requirements",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-app-guidelines-and-requirements/"
+    },
+    {
+      "id": "s6",
+      "title": "Slack Security Review",
+      "url": "https://docs.slack.dev/slack-marketplace/marketplace-terms-conditions/slack-security-review/"
+    },
+    {
+      "id": "s7",
+      "title": "Installing with OAuth",
+      "url": "https://docs.slack.dev/authentication/installing-with-oauth/"
+    },
+    {
+      "id": "s8",
+      "title": "Using PKCE",
+      "url": "https://docs.slack.dev/authentication/using-pkce/"
+    }
+  ],
+  "slug": "slack",
+  "probes": [
+    {
+      "check": "discovery",
+      "request": "GET https://slack.com/.well-known/openid-configuration",
+      "result": "HTTP 200; PKCE not listed; dynamic registration not listed"
+    },
+    {
+      "check": "authorize",
+      "request": "GET https://slack.com/oauth/v2/authorize (fake client_id)",
+      "result": "HTTP 200, landed on slack.com; error hints: ['client_id', 'redirect_uri']"
+    },
+    {
+      "check": "authorize",
+      "request": "GET https://slack.com/openid/connect/authorize (fake client_id)",
+      "result": "HTTP 404, landed on slack.com; error hints: ['client_id', 'application', 'redirect_uri']"
+    },
+    {
+      "check": "discovery",
+      "request": "GET https://slack-gov.com/.well-known/openid-configuration",
+      "result": "HTTP 200; PKCE not listed; dynamic registration not listed"
+    }
+  ],
+  "warnings": [],
+  "origin": "seed",
+  "models": [
+    "gemini-3.1-pro-preview",
+    "gemini-3.8-flash"
+  ],
+  "search_providers": [
+    "gemini"
+  ],
+  "generated_at": "2026-11-01T13:28:47+00:00",
+  "verified_note": ""
+}

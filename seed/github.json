@@ -1,0 +1,303 @@
+{
+  "app": "GitHub",
+  "provider": "GitHub, Inc.",
+  "website": "https://github.com",
+  "category": "Version Control / Developer Tools",
+  "difficulty": "easy",
+  "headline": "GitHub allows immediate, unreviewed production access for external users with zero mandatory approval.",
+  "summary": "Developers can instantly register an OAuth App or GitHub App to authenticate external users and interact with the GitHub API. No manual review, security assessment, or test-user whitelisting is required for direct integration. While listing on the GitHub Marketplace is optional and requires a review, applications can be fully deployed and authorized by any user immediately upon creation.",
+  "hands_on_time": "15 to 30 minutes",
+  "approval_wait": "0 days",
+  "time_to_first_connection": "Under 15 minutes",
+  "time_to_production": "Immediate",
+  "oauth": {
+    "developer_portal": "https://github.com/settings/developers",
+    "docs_url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+    "authorize_url": "https://github.com/login/oauth/authorize",
+    "token_url": "https://github.com/login/oauth/access_token",
+    "pkce": "Supported for authorization code flows using code_challenge_method=S256.",
+    "refresh_tokens": "Standard OAuth App tokens do not expire by default. If expiration is enabled (standard on GitHub Apps), access tokens expire in 8 hours and refresh tokens in 6 months. Refreshing rotates both tokens.",
+    "redirect_uri_rules": "Strict matching of host, port, and path, or a subpath of the registered callback. Loopback IP addresses (127.0.0.1 and ::1) are permitted to vary the port.",
+    "scopes": "OAuth Apps use scopes like repo and public_repo. GitHub Apps use fine-grained permissions."
+  },
+  "stages": [
+    {
+      "name": "Application Registration",
+      "duration": "10 minutes",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Create OAuth or GitHub App",
+          "detail": "Navigate to the Developer settings and register a new application, providing valid redirect URLs, an app name, and a homepage URL.",
+          "owner": "you",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s10",
+            "s7"
+          ]
+        },
+        {
+          "title": "Set App Visibility",
+          "detail": "If using a GitHub App, navigate to Advanced > Danger zone and set the application's visibility to Public to allow external users to install it.",
+          "owner": "you",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s1"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Development and Integration",
+      "duration": "15 to 30 minutes",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Implement Authorization Flow",
+          "detail": "Configure the AI agent to redirect users to the authorize endpoint, passing PKCE parameters and requesting required scopes.",
+          "owner": "agent",
+          "duration": "15 minutes",
+          "source_ids": [
+            "s7"
+          ]
+        },
+        {
+          "title": "Handle Callback and Token Exchange",
+          "detail": "Implement the redirect URI handler to exchange the authorization code and PKCE verifier for access and refresh tokens.",
+          "owner": "agent",
+          "duration": "15 minutes",
+          "source_ids": [
+            "s7"
+          ]
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "text": "Valid redirect URLs, app name, and homepage URL are required to register an application.",
+      "status": "sourced",
+      "source_ids": [
+        "s7"
+      ]
+    },
+    {
+      "text": "GitHub Apps must be explicitly configured with Public visibility under Advanced settings to be installed by external users.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Organization accounts, enforced 2FA, verified domains, and substantive integration functionality are required only if opting to list on the GitHub Marketplace.",
+      "status": "sourced",
+      "source_ids": [
+        "s6",
+        "s8"
+      ]
+    }
+  ],
+  "gotchas": [
+    {
+      "text": "GitHub does not publish standard OAuth/OIDC discovery metadata documents at its root.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "Signing in the same user more than 10 times in one hour triggers a loop protection mechanism, requiring the user to manually re-authorize.",
+      "status": "sourced",
+      "source_ids": [
+        "s14"
+      ]
+    },
+    {
+      "text": "Accessing repositories owned by an organization requires an organization owner's explicit approval if the organization has enabled third-party application restrictions.",
+      "status": "sourced",
+      "source_ids": [
+        "s4"
+      ]
+    },
+    {
+      "text": "OAuth App tokens do not expire by default, but if token expiration is enabled, access tokens expire in 8 hours and refresh tokens in 6 months.",
+      "status": "sourced",
+      "source_ids": [
+        "s11",
+        "s7"
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "action": "access user repositories and create pull requests",
+      "scopes": [
+        "repo",
+        "public_repo",
+        "Pull requests: Read & write",
+        "Contents: Read & write"
+      ],
+      "review_impact": "Requesting the repo scope yields broad write access. It triggers organization owner approval during authorization if the target repository belongs to an organization with third-party restrictions enabled. No mandatory GitHub review or paid plan is required.",
+      "source_ids": [
+        "s12",
+        "s13",
+        "s4",
+        "s10"
+      ],
+      "status": "sourced"
+    }
+  ],
+  "blockers": [
+    {
+      "issue": "Organization owner approval is required to access restricted repositories.",
+      "how_to_proceed": "Instruct the user to request approval during the OAuth flow, or contact their organization administrator directly to approve the application in the organization's Third-party access settings."
+    },
+    {
+      "issue": "Optional GitHub Marketplace listing application is rejected due to insufficient value beyond auth.",
+      "how_to_proceed": "Bypass the Marketplace and use a direct OAuth integration, or build additional workflows into your app before resubmitting."
+    }
+  ],
+  "agent_can": [
+    "Read technical documentation to map endpoint URLs and parameters",
+    "Implement the authorization code flow with PKCE and token exchange logic",
+    "Draft the required Privacy Policy and Terms of Service if pursuing a Marketplace listing"
+  ],
+  "you_must": [
+    "Create the application in your GitHub Developer settings",
+    "Define the application's redirect URIs and base configuration",
+    "Publish the GitHub App via the Danger zone settings for public use"
+  ],
+  "key_claims": [
+    {
+      "text": "GitHub does not require any review, verification, or approval before arbitrary external users can authorize an OAuth App or install a public GitHub App.",
+      "status": "sourced",
+      "source_ids": [
+        "s1",
+        "s3"
+      ]
+    },
+    {
+      "text": "GitHub's authorization endpoint requires authentication to access developer settings but actively validates OAuth parameters.",
+      "status": "tested",
+      "source_ids": []
+    }
+  ],
+  "open_questions": [
+    "What is the average review time for an optional GitHub Marketplace listing?"
+  ],
+  "assumptions": [
+    "Hands-on time estimates assume a standard setup for direct OAuth usage without pursuing an optional Marketplace listing.",
+    "Developers will primarily use standard OAuth Apps or public GitHub Apps rather than pursuing publisher verification."
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Making a GitHub App public or private",
+      "url": "https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/making-a-github-app-public-or-private"
+    },
+    {
+      "id": "s2",
+      "title": "About creating GitHub Apps",
+      "url": "https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/about-creating-github-apps"
+    },
+    {
+      "id": "s3",
+      "title": "Authorizing GitHub Apps",
+      "url": "https://docs.github.com/en/apps/using-github-apps/authorizing-github-apps"
+    },
+    {
+      "id": "s4",
+      "title": "Approving OAuth Apps for your organization",
+      "url": "https://docs.github.com/en/organizations/managing-oauth-access-to-your-organizations-data/approving-oauth-apps-for-your-organization"
+    },
+    {
+      "id": "s5",
+      "title": "Submitting your listing for publication",
+      "url": "https://docs.github.com/en/apps/github-marketplace/listing-an-app-on-github-marketplace/submitting-your-listing-for-publication"
+    },
+    {
+      "id": "s6",
+      "title": "Applying for publisher verification for your organization",
+      "url": "https://docs.github.com/en/apps/github-marketplace/github-marketplace-overview/applying-for-publisher-verification-for-your-organization"
+    },
+    {
+      "id": "s7",
+      "title": "Authorizing OAuth Apps",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps"
+    },
+    {
+      "id": "s8",
+      "title": "Requirements for listing an app on GitHub Marketplace",
+      "url": "https://docs.github.com/en/apps/github-marketplace/creating-apps-for-github-marketplace/requirements-for-listing-an-app"
+    },
+    {
+      "id": "s9",
+      "title": "Testing your app",
+      "url": "https://docs.github.com/enterprise-cloud@latest/apps/github-marketplace/using-the-github-marketplace-api-in-your-app/testing-your-app"
+    },
+    {
+      "id": "s10",
+      "title": "Creating an OAuth App",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app"
+    },
+    {
+      "id": "s11",
+      "title": "Refreshing user access tokens",
+      "url": "https://docs.github.com/enterprise-cloud@latest/apps/creating-github-apps/authenticating-with-a-github-app/refreshing-user-access-tokens"
+    },
+    {
+      "id": "s12",
+      "title": "Scopes for OAuth Apps",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps"
+    },
+    {
+      "id": "s13",
+      "title": "Differences between GitHub Apps and OAuth Apps",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps"
+    },
+    {
+      "id": "s14",
+      "title": "Rate limits for OAuth Apps",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/rate-limits-for-oauth-apps"
+    },
+    {
+      "id": "s15",
+      "title": "Rate limits for the REST API",
+      "url": "https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api"
+    },
+    {
+      "id": "s16",
+      "title": "Pricing plans for GitHub Marketplace apps",
+      "url": "https://docs.github.com/en/apps/github-marketplace/selling-your-app-on-github-marketplace/pricing-plans-for-github-marketplace-apps"
+    }
+  ],
+  "slug": "github",
+  "probes": [
+    {
+      "check": "discovery",
+      "request": "GET https://github.com/.well-known/openid-configuration",
+      "result": "HTTP 404, no metadata"
+    },
+    {
+      "check": "discovery",
+      "request": "GET https://github.com/.well-known/oauth-authorization-server",
+      "result": "HTTP 404, no metadata"
+    },
+    {
+      "check": "authorize",
+      "request": "GET https://github.com/login/oauth/authorize (fake client_id)",
+      "result": "HTTP 200, landed on github.com; error hints: ['client_id', 'application', 'redirect_uri']"
+    }
+  ],
+  "warnings": [
+    "Source s10 was cited but not opened or returned by search in this run: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app"
+  ],
+  "origin": "seed",
+  "models": [
+    "gemini-3.1-pro-preview",
+    "gemini-3.8-flash"
+  ],
+  "search_providers": [
+    "gemini"
+  ],
+  "generated_at": "2026-11-01T14:45:08+00:00",
+  "verified_note": ""
+}

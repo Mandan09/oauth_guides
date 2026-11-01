@@ -1,0 +1,336 @@
+{
+  "app": "Dropbox",
+  "provider": "Dropbox, Inc.",
+  "website": "https://www.dropbox.com",
+  "category": "File Storage",
+  "difficulty": "moderate",
+  "headline": "Dropbox allows immediate API access for up to 500 external users in Development mode, but triggers a strict 2-week window to pass a mandatory review for Production status once 50 users are linked.",
+  "summary": "Developers can create a scoped OAuth app to upload, download, and search files. The app starts in Development mode, allowing initial access, but reaching 50 linked users triggers a strict 2-week countdown to obtain Production approval. Production review requires an API usage description, privacy policy, custom icon, and adherence to least privilege scoping.",
+  "hands_on_time": "1 to 2 hours",
+  "approval_wait": "A few business days",
+  "time_to_first_connection": "15 minutes",
+  "time_to_production": "3 to 5 business days",
+  "oauth": {
+    "developer_portal": "https://www.dropbox.com/developers",
+    "docs_url": "https://docs.dropboxapi.com/dropbox-api/docs/oauth",
+    "authorize_url": "https://www.dropbox.com/oauth2/authorize",
+    "token_url": "https://api.dropboxapi.com/oauth2/token",
+    "pkce": "Supported and recommended for public clients via code_challenge and code_challenge_method=S256",
+    "refresh_tokens": "Supported. Pass token_access_type=offline in the authorize request to get a long-lived refresh token. Exchanged via grant_type=refresh_token.",
+    "redirect_uri_rules": "Exact URI matching enforced. Must use https:// for production, http:// allowed for localhost/127.0.0.1 local development. Omitted URI defaults to out-of-band flow.",
+    "scopes": "Space-delimited scope string in the authorize request. Must be enabled in the App Console first."
+  },
+  "stages": [
+    {
+      "name": "App Registration",
+      "duration": "15 minutes",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Create app and configure OAuth",
+          "detail": "Register app in App Console, choose scoped access (App folder or Full Dropbox), get client credentials, and add exact redirect URIs.",
+          "owner": "you",
+          "duration": "15 minutes",
+          "source_ids": [
+            "s1",
+            "s2"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Implementation and Testing",
+      "duration": "1 to 2 hours",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Implement PKCE and offline tokens",
+          "detail": "Implement Authorization Code flow with PKCE and token_access_type=offline for refresh tokens, then test API endpoints.",
+          "owner": "agent",
+          "duration": "1 to 2 hours",
+          "source_ids": [
+            "s3",
+            "s8"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Production Review Submission",
+      "duration": "30 minutes",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Prepare and submit production review",
+          "detail": "Upload custom icon, add privacy policy, write detailed API usage justification, and request review in the console.",
+          "owner": "you",
+          "duration": "30 minutes",
+          "source_ids": [
+            "s1"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Provider Approval",
+      "duration": "3 to 5 business days",
+      "blocking": true,
+      "steps": [
+        {
+          "title": "Wait for Dropbox review",
+          "detail": "Dropbox reviews the submitted materials and grants production status to lift the 500-user hard cap and 50-user timer.",
+          "owner": "provider",
+          "duration": "3 to 5 business days",
+          "source_ids": [
+            "s1",
+            "s5"
+          ]
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "text": "A custom application icon must be uploaded in the App Console.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "A detailed API usage explanation describing how the app interacts with Dropbox and why permissions are required.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Justification of least privilege scoping, demonstrating why requested access levels (e.g., Full Dropbox vs App folder) are necessary.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "A functioning privacy policy respecting user data.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Adherence to Dropbox Developer Branding Guidelines, including proper naming and avoiding implications of official partnership.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    }
+  ],
+  "gotchas": [
+    {
+      "text": "Linking 50 users starts a strict 2-week countdown timer. If production approval is not obtained within two weeks, linking new users is frozen.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "The app display name is permanently locked once approved for Production status and cannot be edited without contacting support.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Standard access tokens expire after approximately 4 hours. You must request token_access_type=offline during authorization to receive a refresh token.",
+      "status": "sourced",
+      "source_ids": [
+        "s3"
+      ]
+    },
+    {
+      "text": "Redirect URIs require exact matching and must use HTTPS, with the sole exception of localhost or 127.0.0.1 for local development.",
+      "status": "sourced",
+      "source_ids": [
+        "s2"
+      ]
+    },
+    {
+      "text": "Rate limits are dynamic and concurrency-based. Your application must parse and respect the Retry-After HTTP header when receiving a 429 error.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "action": "Upload files",
+      "scopes": [
+        "files.content.write"
+      ],
+      "review_impact": "Does not require a paid plan or administrator consent; standard Dropbox users can authorize. General production review is required to exceed user limits.",
+      "source_ids": [
+        "s4",
+        "s8"
+      ],
+      "status": "sourced"
+    },
+    {
+      "action": "Download files",
+      "scopes": [
+        "files.content.read"
+      ],
+      "review_impact": "Does not require a paid plan or administrator consent; standard Dropbox users can authorize. General production review is required to exceed user limits.",
+      "source_ids": [
+        "s4",
+        "s8"
+      ],
+      "status": "sourced"
+    },
+    {
+      "action": "Search files",
+      "scopes": [
+        "files.metadata.read"
+      ],
+      "review_impact": "Does not require a paid plan or administrator consent; standard Dropbox users can authorize. General production review is required to exceed user limits.",
+      "source_ids": [
+        "s4",
+        "s8"
+      ],
+      "status": "sourced"
+    }
+  ],
+  "blockers": [
+    {
+      "issue": "New user connections are frozen after reaching 50 users.",
+      "how_to_proceed": "Submit the Production status request immediately from the App Console, ensuring you provide a privacy policy, custom icon, and API usage justification."
+    },
+    {
+      "issue": "Refresh token is not returned during the OAuth token exchange.",
+      "how_to_proceed": "Ensure your authorization URL includes the query parameter token_access_type=offline."
+    }
+  ],
+  "agent_can": [
+    "Implement the OAuth 2.0 Authorization Code flow with PKCE.",
+    "Configure the authorization request to ask for token_access_type=offline for long-lived access.",
+    "Implement backoff logic to parse and respect the Retry-After header on 429 Too Many Requests errors.",
+    "Draft the API usage descriptions and scope justifications for the Production review."
+  ],
+  "you_must": [
+    "Create the scoped app in the Dropbox App Console and provide the client ID and secret.",
+    "Upload a custom application icon and provide a valid privacy policy URL in the App Console.",
+    "Ensure the application name complies with Dropbox branding guidelines (e.g., does not use the word Dropbox).",
+    "Submit the app for Production review once eligible or provide justification for an early review."
+  ],
+  "key_claims": [
+    {
+      "text": "The OAuth discovery and authorization endpoints are active and enforce client ID validation.",
+      "status": "tested",
+      "source_ids": [
+        "s6"
+      ]
+    },
+    {
+      "text": "Apps using solely pre-built drop-in components (Chooser, Saver, Embedder) do not require production review.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Dropbox does not charge fees for developer accounts or API usage, and does not mandate external third-party security audits (e.g., CASA/SOC 2) for standard OAuth API access.",
+      "status": "sourced",
+      "source_ids": [
+        "s7"
+      ]
+    },
+    {
+      "text": "Production review typically takes a few business days once submitted and eligible.",
+      "status": "sourced",
+      "source_ids": [
+        "s5"
+      ]
+    }
+  ],
+  "open_questions": [
+    "How reliably does Dropbox approve early review requests for apps that have not yet reached the 50-user threshold?"
+  ],
+  "assumptions": [
+    "Hands-on time and time to first connection are estimates, not published by the provider.",
+    "Time to production includes both hands-on preparation time and the estimated provider review wait time."
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Dropbox Developer Guide - Developer Resources",
+      "url": "https://docs.dropboxapi.com/dropbox-api/docs/developer-resources/developer-guide"
+    },
+    {
+      "id": "s2",
+      "title": "Dropbox OAuth Guide",
+      "url": "https://docs.dropboxapi.com/dropbox-api/docs/oauth"
+    },
+    {
+      "id": "s3",
+      "title": "Migrating App Permissions and Access Tokens",
+      "url": "https://dropbox.tech/developers/migrating-app-permissions-and-access-tokens"
+    },
+    {
+      "id": "s4",
+      "title": "Customizing Scopes in OAuth Flow",
+      "url": "https://dropbox.tech/developers/customizing-scopes-in-oauth-flow"
+    },
+    {
+      "id": "s5",
+      "title": "Dropbox Developer Reference Guide",
+      "url": "https://www.dropbox.com/developers/reference/developer-guide"
+    },
+    {
+      "id": "s6",
+      "title": "Dropbox Authorization Endpoint (Probe)",
+      "url": "https://www.dropbox.com/oauth2/authorize"
+    },
+    {
+      "id": "s7",
+      "title": "Dropbox Developer Terms of Service",
+      "url": "https://www.dropbox.com/developers/reference/tos"
+    },
+    {
+      "id": "s8",
+      "title": "Dropbox OAuth 2.0 Guide",
+      "url": "https://developers.dropbox.com/oauth-guide"
+    },
+    {
+      "id": "s9",
+      "title": "Dropbox Community Forum - Production Status Request",
+      "url": "https://community.dropbox.com/en/discussion/861504/self-hosted-overleaf-community-server-would-every-big-server-need-a-production-status-request"
+    }
+  ],
+  "slug": "dropbox",
+  "probes": [
+    {
+      "check": "discovery",
+      "request": "GET https://www.dropbox.com/.well-known/openid-configuration",
+      "result": "HTTP 200; PKCE not listed; dynamic registration not listed"
+    },
+    {
+      "check": "authorize",
+      "request": "GET https://www.dropbox.com/oauth2/authorize (fake client_id)",
+      "result": "HTTP 200, landed on www.dropbox.com; error hints: ['client_id']"
+    }
+  ],
+  "warnings": [
+    "Source s6 was cited but not opened or returned by search in this run: https://www.dropbox.com/oauth2/authorize"
+  ],
+  "origin": "seed",
+  "models": [
+    "gemini-3.1-pro-preview",
+    "gemini-3.8-flash"
+  ],
+  "search_providers": [
+    "gemini"
+  ],
+  "generated_at": "2026-11-01T14:36:11+00:00",
+  "verified_note": ""
+}

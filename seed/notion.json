@@ -1,0 +1,312 @@
+{
+  "app": "Notion",
+  "provider": "Notion Labs, Inc.",
+  "website": "https://www.notion.com",
+  "category": "Productivity",
+  "difficulty": "easy",
+  "headline": "Developers can instantly launch a public Notion OAuth integration to all users without mandatory review or test caps.",
+  "summary": "Notion allows immediate OAuth access to any workspace via 'public connections' without requiring app review, whitelisting, or security audits. By selecting the 'Any workspace' installation scope during app creation, developers can immediately distribute their authorization URL. Permissions are statically managed as 'Capabilities' in the developer portal and dynamically granted by end users via an interactive Page Picker. Marketplace listing is completely optional.",
+  "hands_on_time": "15 to 30 minutes",
+  "approval_wait": "0 days for OAuth; 5 to 10 business days for optional Marketplace listing",
+  "time_to_first_connection": "Instant",
+  "time_to_production": "Instant",
+  "oauth": {
+    "developer_portal": "https://app.notion.com/developers/connections",
+    "docs_url": "https://developers.notion.com/guides/get-started/authorization",
+    "authorize_url": "https://api.notion.com/v1/oauth/authorize",
+    "token_url": "https://api.notion.com/v1/oauth/token",
+    "pkce": "Notion's standard REST API does not support PKCE and lacks CORS headers, requiring a confidential backend server. However, the separate Notion MCP server (mcp.notion.com) natively supports PKCE.",
+    "refresh_tokens": "Standard REST API OAuth tokens are long-lived and do not return an expires_in attribute. However, the token endpoint does support grant_type='refresh_token' to rotate tokens.",
+    "redirect_uri_rules": "Must be pre-registered in the developer portal. If multiple URIs are saved, the redirect_uri parameter is mandatory in the token exchange POST body and must exactly match the authorization URL.",
+    "scopes": "Notion does not use standard OAuth scope strings. Permissions are statically configured as 'Capabilities' in the developer portal. Fine-grained page access is granted explicitly by the user via an interactive Page Picker during authorization."
+  },
+  "stages": [
+    {
+      "name": "App Registration and Configuration",
+      "duration": "15 to 30 minutes",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Create public connection",
+          "detail": "Log into the Notion Developer portal, navigate to Build > Public connections > Create new connection, and fill in the basic details.",
+          "owner": "you",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s1"
+          ]
+        },
+        {
+          "title": "Set installation scope",
+          "detail": "Select 'Any workspace' for the installation scope to ensure the integration is immediately available for external users to install.",
+          "owner": "you",
+          "duration": "5 minutes",
+          "source_ids": [
+            "s1"
+          ]
+        },
+        {
+          "title": "Configure capabilities and endpoints",
+          "detail": "Define Redirect URIs and configure static Capabilities (e.g., Content, Comments, User information) required by the application.",
+          "owner": "you",
+          "duration": "10 minutes",
+          "source_ids": [
+            "s1",
+            "s12"
+          ]
+        },
+        {
+          "title": "Implement backend token exchange",
+          "detail": "Write the server-side code to handle the OAuth callback and exchange the authorization code for an access token via HTTP Basic Authentication.",
+          "owner": "agent",
+          "duration": "10 to 20 minutes",
+          "source_ids": [
+            "s7",
+            "s8",
+            "s9"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Marketplace Listing (Optional)",
+      "duration": "5 to 10 business days",
+      "blocking": false,
+      "steps": [
+        {
+          "title": "Prepare listing assets",
+          "detail": "Gather required assets including integration name, description, tags, logos, screenshots, and ensure general availability of the underlying service.",
+          "owner": "you",
+          "duration": "1 to 2 hours",
+          "source_ids": [
+            "s3",
+            "s6"
+          ]
+        },
+        {
+          "title": "Notion Security Review",
+          "detail": "Submit the application for Notion's internal review to be listed on the public Integration Gallery.",
+          "owner": "provider",
+          "duration": "5 to 10 business days",
+          "source_ids": [
+            "s3"
+          ]
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "text": "The installation scope must be set to 'Any workspace' at creation to allow external users to connect immediately.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "A confidential backend server is required to complete the OAuth token exchange due to intentional omission of CORS headers on the token endpoint.",
+      "status": "sourced",
+      "source_ids": [
+        "s9"
+      ]
+    },
+    {
+      "text": "To list on the Notion Marketplace, the integration must be generally available (no private betas) and comply with brand guidelines.",
+      "status": "sourced",
+      "source_ids": [
+        "s3",
+        "s6"
+      ]
+    }
+  ],
+  "gotchas": [
+    {
+      "text": "Selecting 'Selected workspaces only' as the installation scope is irreversible; a completely new connection must be created to change it later.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Users frequently fail to select required specific pages in the OAuth Page Picker, causing 404 Object Not Found or 403 errors when the integration queries them.",
+      "status": "uncertain",
+      "source_ids": [
+        "s7"
+      ]
+    },
+    {
+      "text": "End users can only authorize access to Notion pages where they hold 'Full access' permissions.",
+      "status": "uncertain",
+      "source_ids": [
+        "s7"
+      ]
+    },
+    {
+      "text": "Inconsistently passing or omitting the redirect_uri parameter between the authorization URL and token exchange POST causes invalid_grant errors.",
+      "status": "uncertain",
+      "source_ids": [
+        "s8",
+        "s13"
+      ]
+    },
+    {
+      "text": "Tokens generated via the standard REST API OAuth flow are incompatible with the hosted Notion MCP server (mcp.notion.com).",
+      "status": "uncertain",
+      "source_ids": [
+        "s14"
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "issue": "API requests return '404 Object not found' or '403' after a user completes the OAuth flow.",
+      "how_to_proceed": "Instruct the user to re-authenticate and explicitly select the missing pages (or their parent pages) in the Notion OAuth Page Picker, ensuring they possess 'Full access' permissions for those specific pages."
+    },
+    {
+      "issue": "Cannot change the installation scope to 'Any workspace' for broader distribution.",
+      "how_to_proceed": "The scope setting is irreversible. Create a brand new public connection in the Notion Developer portal from scratch and select 'Any workspace'."
+    },
+    {
+      "issue": "Token exchange requests fail with CORS blocking in the browser.",
+      "how_to_proceed": "Move the POST request for the token exchange to a backend server. Notion deliberately restricts browser-only code exchange on standard REST API endpoints."
+    }
+  ],
+  "agent_can": [
+    "Read Notion API documentation to structure requests",
+    "Configure backend endpoints to handle token exchange and Basic Auth headers",
+    "Generate correct OAuth authorization URLs with state parameters"
+  ],
+  "you_must": [
+    "Create the public connection in the Notion Developer portal",
+    "Select the 'Any workspace' scope during app creation",
+    "Prepare and submit materials if opting for a Marketplace listing"
+  ],
+  "key_claims": [
+    {
+      "text": "No mandatory app review or third-party security assessment is required for public OAuth operation.",
+      "status": "sourced",
+      "source_ids": [
+        "s3",
+        "s4"
+      ]
+    },
+    {
+      "text": "Notion does not impose sandboxed test-user caps for public connections.",
+      "status": "sourced",
+      "source_ids": [
+        "s1"
+      ]
+    },
+    {
+      "text": "Standard OAuth/OIDC well-known discovery endpoints are not published on api.notion.com or www.notion.com.",
+      "status": "tested",
+      "source_ids": []
+    },
+    {
+      "text": "The developer portal is live at https://app.notion.com/developers/connections and renders as a single-page application.",
+      "status": "tested",
+      "source_ids": []
+    }
+  ],
+  "open_questions": [
+    "Will Notion introduce CORS headers to the standard REST API to support single-page application (SPA) OAuth flows without a backend?",
+    "Is there a programmatic way to request access to specific database IDs during the OAuth flow rather than relying entirely on user selection in the Page Picker?"
+  ],
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Public connections",
+      "url": "https://developers.notion.com/guides/get-started/public-connections"
+    },
+    {
+      "id": "s2",
+      "title": "Request limits",
+      "url": "https://developers.notion.com/reference/request-limits"
+    },
+    {
+      "id": "s3",
+      "title": "Marketplace listing",
+      "url": "https://developers.notion.com/guides/get-started/marketplace-listing"
+    },
+    {
+      "id": "s4",
+      "title": "Overview",
+      "url": "https://developers.notion.com/guides/get-started/overview"
+    },
+    {
+      "id": "s5",
+      "title": "Add and manage connections with the API",
+      "url": "https://www.notion.com/help/add-and-manage-connections-with-the-api"
+    },
+    {
+      "id": "s6",
+      "title": "Notion Integration Gallery Best Practices",
+      "url": "https://notiondevs.notion.site/Notion-Integration-Gallery-Best-Practices-997825927fd6473e89617ce0c329145c"
+    },
+    {
+      "id": "s7",
+      "title": "Authorization",
+      "url": "https://developers.notion.com/guides/get-started/authorization"
+    },
+    {
+      "id": "s8",
+      "title": "Create a token",
+      "url": "https://developers.notion.com/reference/create-a-token"
+    },
+    {
+      "id": "s9",
+      "title": "Handling API keys",
+      "url": "https://developers.notion.com/guides/get-started/handling-api-keys"
+    },
+    {
+      "id": "s10",
+      "title": "Build MCP client",
+      "url": "https://developers.notion.com/guides/mcp/build-mcp-client"
+    },
+    {
+      "id": "s11",
+      "title": "Refresh a token",
+      "url": "https://developers.notion.com/reference/refresh-a-token"
+    },
+    {
+      "id": "s12",
+      "title": "Capabilities",
+      "url": "https://developers.notion.com/reference/capabilities"
+    },
+    {
+      "id": "s13",
+      "title": "GitHub Issue 277",
+      "url": "https://github.com/makenotion/notion-mcp-server/issues/277"
+    },
+    {
+      "id": "s14",
+      "title": "GitHub Issue 106",
+      "url": "https://github.com/makenotion/notion-mcp-server/issues/106"
+    }
+  ],
+  "slug": "notion",
+  "probes": [
+    {
+      "check": "discovery",
+      "request": "GET https://api.notion.com/.well-known/openid-configuration",
+      "result": "HTTP 400, no metadata"
+    },
+    {
+      "check": "discovery",
+      "request": "GET https://api.notion.com/.well-known/oauth-authorization-server",
+      "result": "HTTP 400, no metadata"
+    },
+    {
+      "check": "authorize",
+      "request": "GET https://api.notion.com/v1/oauth/authorize (fake client_id)",
+      "result": "HTTP 200, landed on app.notion.com; error hints: ['client_id', 'application', 'redirect_uri']"
+    }
+  ],
+  "warnings": [],
+  "origin": "seed",
+  "models": [],
+  "search_providers": [
+    "duckduckgo"
+  ],
+  "generated_at": "2026-11-01T13:20:17+00:00",
+  "verified_note": ""
+}

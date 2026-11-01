@@ -1,0 +1,72 @@
+{% macro refs(ids) %}{% for i in ids %}<a class="ref" href="#src-{{ i }}">{{ i }}</a>{% endfor %}{% endmacro %}
+{% macro claims(items) %}<ul class="claims">{% for c in items %}<li data-status="{{ c.status }}"><span class="status {{ c.status }}">{{ c.status }}</span> {{ c.text }} {{ refs(c.source_ids) }}</li>{% endfor %}</ul>{% endmacro %}
+<article class="guide" data-slug="{{ g.slug }}" data-title="{{ g.app }}">
+  <div class="guide-head">
+    <img class="app-icon" src="{{ g.website | favicon }}" alt="" width="32" height="32">
+    <div>
+      <h1>{{ g.app }} <span class="badge {{ g.difficulty }}">{{ g.difficulty }}</span></h1>
+      <p class="muted small">{{ g.provider }} · <a href="{{ g.website }}" target="_blank" rel="noopener">{{ g.website | host }}</a> · {{ g.category }}</p>
+    </div>
+  </div>
+  <p class="headline">{{ g.headline }}</p>
+
+  {% if g.hands_on_time %}<div class="tiles">
+    <div><span>Hands-on work</span><strong>{{ g.hands_on_time }}</strong></div>
+    <div><span>Approval wait</span><strong>{{ g.approval_wait }}</strong></div>
+    <div><span>First test connection</span><strong>{{ g.time_to_first_connection }}</strong></div>
+    <div><span>Ready for production</span><strong>{{ g.time_to_production }}</strong></div>
+  </div>{% endif %}
+  <p>{{ g.summary }}</p>
+
+  {% if g.stages %}<h2>The path</h2>
+  <div class="filters" data-filter="owner">
+    <button class="on" data-value="all">All steps</button><button data-value="agent">Agent can do</button><button data-value="you">You do</button><button data-value="provider">Waiting on provider</button>
+  </div>
+  <ol class="stages">
+    {% for s in g.stages %}{% set si = loop.index %}
+    <li>
+      <h3>{{ s.name }} <span class="muted small">{{ s.duration }}</span>{% if s.blocking %} <span class="tag">blocking</span>{% endif %}</h3>
+      <ul class="steps">{% for st in s.steps %}
+        <li data-owner="{{ st.owner }}"><label><input type="checkbox" data-step="{{ si }}-{{ loop.index }}"><span><span class="owner {{ st.owner }}">{{ st.owner }}</span> <strong>{{ st.title }}</strong>{% if st.duration %} <span class="muted small">{{ st.duration }}</span>{% endif %}<br>{{ st.detail }} {{ refs(st.source_ids) }}</span></label></li>
+      {% endfor %}</ul>
+    </li>
+    {% endfor %}
+  </ol>{% endif %}
+
+  {% if g.agent_can or g.you_must %}<div class="split">
+    <div><h2>What an agent can do</h2><ul>{% for x in g.agent_can %}<li>{{ x }}</li>{% endfor %}</ul></div>
+    <div><h2>Where you take over</h2><ul>{% for x in g.you_must %}<li>{{ x }}</li>{% endfor %}</ul></div>
+  </div>{% endif %}
+
+  {% if g.permissions %}
+  <h2>Permissions your agent needs</h2>
+  <table class="facts">
+    <tr><th>Action</th><th>Scopes</th><th>Review impact</th></tr>
+    {% for p in g.permissions %}<tr><td>{{ p.action }}</td><td>{% for s in p.scopes %}<code>{{ s }}</code> {% endfor %}<br><span class="status {{ p.status }}" title="{{ 'Scope strings found in the official docs' if p.status == 'sourced' else 'Not confirmed in the docs; check before requesting' }}">{{ p.status }}</span></td><td>{{ p.review_impact }} {{ refs(p.source_ids) }}</td></tr>{% endfor %}
+  </table>
+  {% endif %}
+
+  {% if g.requirements %}<h2>Requirements</h2>{{ claims(g.requirements) }}{% endif %}
+  {% if g.gotchas %}<h2>Gotchas</h2>{{ claims(g.gotchas) }}{% endif %}
+
+  {% if g.blockers %}<h2>If you get stuck</h2>{% endif %}
+  {% for b in g.blockers %}<details class="blocker"><summary>{{ b.issue }}</summary><p>{{ b.how_to_proceed }}</p></details>{% endfor %}
+
+  {% if g.oauth.authorize_url or g.oauth.developer_portal %}<h2>OAuth details</h2>
+  <table class="facts">{% for k, v in g.oauth %}{% if v %}<tr><th>{{ k.replace('_', ' ') }}</th><td>{% if v.startswith('http') %}<a href="{{ v }}" target="_blank" rel="noopener">{{ v }}</a>{% else %}{{ v }}{% endif %}</td></tr>{% endif %}{% endfor %}</table>{% endif %}
+
+  {% if g.key_claims or g.sources %}<section class="evidence">
+    <h2>Evidence</h2>
+    <div class="filters" data-filter="status">
+      <button class="on" data-value="all">All</button><button data-value="tested">Tested live</button><button data-value="sourced">Sourced</button><button data-value="uncertain">Uncertain</button>
+    </div>
+    {{ claims(g.key_claims) }}
+    {% if g.probes %}<h3>Live probes</h3><table class="facts">{% for p in g.probes %}<tr><th>{{ p.check }}</th><td><code>{{ p.request }}</code><br>{{ p.result }}</td></tr>{% endfor %}</table>{% endif %}
+    {% if g.assumptions %}<h3>Assumptions and estimates</h3><ul>{% for a in g.assumptions %}<li>{{ a }}</li>{% endfor %}</ul>{% endif %}
+    {% if g.open_questions %}<h3>Open questions</h3><ul>{% for q in g.open_questions %}<li>{{ q }}</li>{% endfor %}</ul>{% endif %}
+    <h3>Sources</h3>
+    <ol class="sources">{% for s in g.sources %}<li id="src-{{ s.id }}"><img src="{{ s.url | favicon }}" alt="" width="16" height="16"><span class="ref">{{ s.id }}</span> <a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.title }}</a> <span class="muted small">{{ s.url | host }}</span></li>{% endfor %}</ol>
+    {% if g.warnings %}<details><summary>Validator notes ({{ g.warnings|length }})</summary><ul>{% for w in g.warnings %}<li>{{ w }}</li>{% endfor %}</ul></details>{% endif %}
+    {% if g.generated_at %}<p class="muted small">{{ 'Library guide' if g.origin == 'seed' else 'Generated live' }} on {{ g.generated_at[:10] }}{% if g.verified_note %} · {{ g.verified_note }}{% endif %}</p>{% endif %}
+  </section>{% endif %}
+</article>
