@@ -364,7 +364,7 @@ function followRun(item, { replay }, owner) {
     const d = JSON.parse(e.data);
     notes[d.id] ??= add(el("li", "note typing", `${lane(d.stage)}<span class="note-text"></span>`));
     $(".note-text", notes[d.id]).textContent += d.delta;
-    status($(".note-text", notes[d.id]).textContent.split(/(?<=[.!?])\s/)[0].slice(0, 140));
+    status($(".note-text", notes[d.id]).textContent.replace(/[#*`>_]+/g, "").trim().split(/(?<=[.!?])\s/)[0].slice(0, 140));
   });
 
   source.addEventListener("text_end", (e) => {

@@ -4,7 +4,9 @@ Before a developer can let users connect an app to their AI agent, they usually 
 
 This app answers that question per provider: **how hard is it, how long will it take (your work vs. waiting on the provider), which permissions you need, what an agent can do for you, and where you have to take over**. Every claim is labelled *tested* (confirmed by a live probe), *sourced* (stated on a cited page) or *uncertain*.
 
-**Live:** _add the Render URL here_ · **Test log:** [docs/TESTING.md](docs/TESTING.md)
+**Live:** https://oauth-guides.onrender.com · **Test log:** [docs/TESTING.md](docs/TESTING.md)
+
+> Hosted on Render's free tier: if it has been idle, the first request can take about a minute while it wakes up.
 
 ## What it does
 
@@ -82,6 +84,6 @@ The library loads from `seed/` on first start. To refresh it from a local databa
 
 - **Not verified with real accounts.** Guides come from public docs plus credential-free probes; no provider approval was actually attempted.
 - **Older guides:** guides made before the stricter evidence rules keep their old labels until regenerated.
-- **Speed:** a new guide takes about 2–3 minutes and about 50–65k tokens.
+- **Speed:** a new guide takes about 2–3 minutes locally and about 3–4 minutes on Render's free instance (a fraction of a CPU), at about 50–65k tokens.
 - **Interrupted runs:** a restart interrupts research in progress, and the run is marked failed. Follow-up answers stop if the browser leaves mid-answer.
 - **No accounts:** chats are tied to an anonymous browser id, not a login.
