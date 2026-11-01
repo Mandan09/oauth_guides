@@ -1,0 +1,12 @@
+# Render's free tier sleeps after 15 idle minutes; a ping every 10 minutes keeps the demo awake.
+# Set the repository variable APP_URL (Settings → Secrets and variables → Actions → Variables).
+name: keep-alive
+on:
+  schedule: [{ cron: "*/10 * * * *" }]
+  workflow_dispatch:
+jobs:
+  ping:
+    if: ${{ vars.APP_URL != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsS --max-time 90 "${{ vars.APP_URL }}/healthz"
