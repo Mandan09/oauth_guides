@@ -1,89 +1,72 @@
 # OAuth App Guides
 
-Before a developer can let users connect an app to their AI agent, they usually need their **own OAuth app** registered with the provider and approved for production. That path ranges from 15 minutes (Notion) to weeks plus a paid security audit (Gmail, Google Drive), and it is hard to tell which in advance.
+If you're building an AI agent that connects to your users' Gmail, Slack or HubSpot, you'll eventually need your own OAuth app with that provider, and it has to be approved before real users can connect. For some providers that takes fifteen minutes. For others it takes weeks and a paid security audit. Usually you only find out which once you're halfway through.
 
-This app answers that question per provider: **how hard is it, how long will it take (your work vs. waiting on the provider), which permissions you need, what an agent can do for you, and where you have to take over**. Every claim is labelled *tested* (confirmed by a live probe), *sourced* (stated on a cited page) or *uncertain*.
+I built this to answer that up front. Look up an app, or describe what your agent needs to do, and you get a guide that tells you:
 
-**Live:** https://oauth-guides.onrender.com · **Test log:** [docs/TESTING.md](docs/TESTING.md)
+- how hard it is, and how long it takes: your own work and the time spent waiting on the provider, shown separately
+- the exact permissions (scopes) your agent needs, and whether any of them trigger a review
+- the steps in order, each marked as something an agent can do for you, something you have to do, or a wait on the provider
+- what to do when you get stuck
+- where every claim comes from, marked as tested live, sourced from the docs, or uncertain
 
-> Hosted on Render's free tier: if it has been idle, the first request can take about a minute while it wakes up.
+**Try it:** https://oauth-guides.onrender.com
+(It runs on Render's free tier, so if nobody has used it for a while, the first page load can take about a minute.)
 
-## What it does
+## Using it
 
-- **Library:** ready guides (Gmail, Google Drive, Slack, Notion, HubSpot, Microsoft Outlook, Asana, Linear, Jira, GitHub, Dropbox, Zoho CRM, Keka), each at a shareable `/g/<slug>` link with PDF, Word, Markdown, HTML and JSON export.
-- **Live generation:** type any app name or website, or describe what your agent must do ("read projects, create tasks…"), and agents research it while you watch. The guide is then written into the side panel as you read.
-- **Follow-up questions** about the open guide, answered from the guide first and the provider's docs if needed.
-- **Asks instead of guessing** when no app is named, and **stops early** when a site has no third-party OAuth (e.g. `example.com`).
+- **Pick a guide from the library.** There are 13 ready to go: Gmail, Google Drive, Slack, Notion, HubSpot, Microsoft Outlook, Asana, Linear, Jira, GitHub, Dropbox, Zoho CRM and Keka.
+- **Type any app name or website.** If it isn't in the library, the agent researches it while you watch. The guide writes itself into the side panel, usually in two to three minutes.
+- **Describe what you need instead**, e.g. *"my agent needs to read projects, create tasks and assign people"*. It recommends a few services that fit and starts on the best one.
+- **Ask follow-up questions** about the open guide, e.g. *"which scopes do I need for webhooks?"*.
+- **Share or export** any guide: copy the link, or download it as PDF, Word, Markdown, HTML or JSON.
 
 ## How it works
 
-```
-message ─► intake (Gemini, one call): app name · need → recommend services · follow-up · clarify
-             │
-             ▼
-   resolver ─► ┌ review researcher  (approval, verification, timelines)
-               ├ OAuth researcher   (registration, scopes, tokens, redirect rules)   ─► writer ─► validator ─► guide
-               └ prober             (live checks with a fake client_id, no credentials)
-```
+Every message first goes through a quick check: is this an app name, a description of a need, a follow-up question, or too vague to act on? A vague request gets a clarifying question back instead of a guess.
 
-- **Google ADK** agents, running in parallel where they can, with a tool budget per agent.
-- **Tools:**
-  - `search_web`: Gemini Google Search, then Tavily, then DuckDuckGo
-  - `fetch_page`: reads a page, blocking internal and private URLs
-  - `check_discovery`: looks for the provider's OAuth discovery metadata
-  - `probe_authorize`: calls the authorize endpoint with a fake client_id
-- **Validator (plain code, no LLM):**
-  - Downgrades a claim if its source was never opened.
-  - Downgrades a timeline that never appeared in the research.
-  - Marks a scope "uncertain" if its exact string was not in the docs.
-  - Lists the guide's assumptions.
-- **FastAPI streaming:**
-  - Server-sent events, numbered so a reconnecting browser resumes in order.
-  - The live view streams the agents' short narration, each search with its results, and a progress bar with time left.
-  - The guide is drawn while the writer's JSON is still arriving.
-- **Postgres:**
-  - guides and their versions, runs with their event history, and chats
-  - ADK sessions (one per chat, so follow-ups remember earlier turns)
-  - token usage from ADK's `usage_metadata`, gathered with a plugin
-- **Model fallback:** Gemini, falling back through ADK's `FallbackModel` to OpenRouter and Groq models via LiteLLM, when those keys are set.
+For a new app, a small team of [Google ADK](https://google.github.io/adk-docs/) agents does the research:
 
-## Run locally
+1. **Resolver:** works out which app you mean and finds its developer portal. If the site has no third-party OAuth at all, it stops here and says so.
+2. **Three agents in parallel:**
+   - one researches review and approval rules
+   - one researches the technical OAuth details
+   - one tests the provider's endpoints live, using a fake client ID, with no accounts or credentials
+3. **Writer:** turns the findings into the guide.
+4. **Validator (plain code, no AI):** checks the result. A claim whose source was never actually opened loses its "sourced" label, and so does a scope or timeline that doesn't appear in the research.
+
+You can watch all of this as it happens: short notes from the agents, each search and page read, a progress bar, and then the guide filling in on the right.
+
+**Stack:**
+- FastAPI and Google ADK running on Gemini
+- web search through Gemini's Google Search, falling back to Tavily, then DuckDuckGo
+- Postgres for guides, chats, runs and agent sessions
+- token usage tracked per run with an ADK plugin
+
+## Running it locally
 
 ```bash
-cp .env.example .env        # add GEMINI_API_KEY
+cp .env.example .env        # add your GEMINI_API_KEY
 docker compose up -d --build
 open http://localhost:8000
 ```
 
-Tests: `uv pip install -e '.[dev]'` then `pytest`.
+Run the tests with `pytest`.
 
-## Deploy (Render + Neon, free)
+## Deploying
 
-1. Create a Postgres database at [neon.tech](https://neon.tech) and copy its connection string.
-2. On [render.com](https://render.com): **New → Blueprint**, pick this repo, and fill in `GEMINI_API_KEY` and `DATABASE_URL`. `ADMIN_TOKEN` is generated for you.
-3. Optional: in GitHub, set the repository variable `APP_URL` to the Render URL. The `keep-alive` workflow then pings it every 10 minutes, so the free instance doesn't sleep.
+It's set up for Render with a free Postgres database on Neon:
 
-The library loads from `seed/` on first start. To refresh it from a local database, run `scripts/export_seed.py` (the command is in the file).
+1. Create a database on [neon.tech](https://neon.tech) and copy the connection string (with connection pooling off).
+2. On Render: **New → Blueprint** and pick this repo. Paste in `GEMINI_API_KEY` and `DATABASE_URL`, and Render handles the rest.
+3. To keep the free instance from sleeping, set a repository variable `APP_URL` to the live URL. The `keep-alive` workflow pings it every 10 minutes.
 
-## Key decisions
+On first start, the library loads from `seed/`.
 
-- **Scope:** only getting *your own* OAuth app ready for production. That's where the uncertainty and the waiting are; API usage docs are out of scope.
-- **Evidence over confidence:**
-  - Probes run without accounts or credentials.
-  - Labels are enforced in code, not left to the model.
-  - Unconfirmed scopes and estimated times are marked as such.
-- **Effort and waiting shown separately:** hands-on time, approval wait, first test connection and production readiness are distinct fields.
-- **Agent vs. you:** every step is owned by *agent*, *you* or *provider*.
-- **Cost control:**
-  - A small tool budget per agent.
-  - Library hits cost no research.
-  - Short inputs skip the intake call.
-  - Rate limits: 5 new guides per IP per hour, 50 per day.
+## Choices I made along the way
 
-## Limitations
-
-- **Not verified with real accounts.** Guides come from public docs plus credential-free probes; no provider approval was actually attempted.
-- **Older guides:** guides made before the stricter evidence rules keep their old labels until regenerated.
-- **Speed:** a new guide takes about 2–3 minutes locally and about 3–4 minutes on Render's free instance (a fraction of a CPU), at about 50–65k tokens.
-- **Interrupted runs:** a restart interrupts research in progress, and the run is marked failed. Follow-up answers stop if the browser leaves mid-answer.
-- **No accounts:** chats are tied to an anonymous browser id, not a login.
+- **Only the "get your OAuth app approved" problem.** That's where developers lose days. How to call the API afterwards is already well documented.
+- **Evidence over confidence.** The agent shows what it actually tested and read, and code enforces the labels, so the model can't mark its own homework.
+- **Your effort and the provider's wait shown separately.** "2 hours of work plus 6 weeks of waiting" is a very different plan from "2 days of work".
+- **Spell out who does each step.** Every step is marked agent, you, or provider, so you know where an agent can save you time and where you have to step in.
+- **Don't waste tokens.** Library guides cost nothing to open, each agent has a small search budget, and simple inputs skip the extra AI call.
